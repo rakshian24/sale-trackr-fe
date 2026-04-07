@@ -29,12 +29,26 @@ export const LOGIN = gql`
 `;
 
 export const DASHBOARD_STATS = gql`
-  query DashboardStats {
-    dashboardStats {
-      totalSalesAmount
-      totalOrders
-      fruitsAmount
-      vegetablesAmount
+  query DashboardStats($filter: DashboardFilterInput!) {
+    dashboardStats(filter: $filter) {
+      cashAmount
+      upiAmount
+      totalAmount
+      cashTransactions
+      upiTransactions
+      topSellingItems {
+        itemName
+        totalAmount
+        transactionCount
+      }
+      recentTransactions {
+        id
+        itemSummary
+        itemCount
+        totalPrice
+        paymentMode
+        soldAt
+      }
     }
   }
 `;
@@ -43,19 +57,24 @@ export const SALES = gql`
   query Sales {
     sales {
       id
+      product {
+        id
+      }
       itemName
-      category
-      quantityKg
-      unitPrice
+      quantityValue
+      quantityUnit
+      paymentMode
+      costPrice
+      sellingPrice
       totalPrice
       soldAt
     }
   }
 `;
 
-export const CREATE_SALE = gql`
-  mutation CreateSale($input: CreateSaleInput!) {
-    createSale(input: $input) {
+export const CREATE_SALES = gql`
+  mutation CreateSales($input: CreateSalesInput!) {
+    createSales(input: $input) {
       id
     }
   }
@@ -115,10 +134,24 @@ export const PRODUCTS = gql`
   }
 `;
 
+export const SEARCH_PRODUCTS = gql`
+  query SearchProducts($term: String!) {
+    searchProducts(term: $term) {
+      id
+      name
+      sellingPrice
+      quantityUnit
+    }
+  }
+`;
+
 export const CREATE_PRODUCT = gql`
   mutation CreateProduct($input: CreateProductInput!) {
     createProduct(input: $input) {
       id
+      name
+      sellingPrice
+      quantityUnit
     }
   }
 `;

@@ -6,11 +6,9 @@ import {
   CATEGORIES,
   CREATE_CATEGORY,
   CREATE_PRODUCT,
-  CREATE_SALE,
   DASHBOARD_STATS,
   DELETE_CATEGORY,
   DELETE_PRODUCT,
-  DELETE_SALE,
   LOGIN,
   PRODUCTS,
   REGISTER,
@@ -21,22 +19,7 @@ import {
 import DashboardPage from "./pages/DashboardPage";
 import CategoriesPage from "./pages/CategoriesPage";
 import ProductsPage from "./pages/ProductsPage";
-
-type SaleInput = {
-  itemName: string;
-  category: "FRUIT" | "VEGETABLE";
-  quantityKg: number;
-  unitPrice: number;
-  soldAt: string;
-};
-
-const defaultSale: SaleInput = {
-  itemName: "",
-  category: "VEGETABLE",
-  quantityKg: 1,
-  unitPrice: 30,
-  soldAt: new Date().toISOString().slice(0, 10)
-};
+import AddSalePage from "./pages/AddSalePage";
 
 function App() {
   const apolloClient = useApolloClient();
@@ -45,7 +28,6 @@ function App() {
   const [shopName, setShopName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [saleInput, setSaleInput] = useState<SaleInput>(defaultSale);
   const [categoryName, setCategoryName] = useState("");
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
   const [productName, setProductName] = useState("");
@@ -57,6 +39,7 @@ function App() {
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [datePreset, setDatePreset] = useState<"TODAY" | "YESTERDAY" | "THIS_WEEK" | "LAST_WEEK" | "THIS_MONTH" | "LAST_MONTH">("TODAY");
   const [categoryFieldError, setCategoryFieldError] = useState("");
   const [quickCategoryFieldError, setQuickCategoryFieldError] = useState("");
   const [productFieldErrors, setProductFieldErrors] = useState<{
@@ -69,16 +52,14 @@ function App() {
 
   const [register, { loading: registering }] = useMutation(REGISTER);
   const [login, { loading: loggingIn }] = useMutation(LOGIN);
-  const [createSale, { loading: savingSale }] = useMutation(CREATE_SALE, { refetchQueries: [SALES, DASHBOARD_STATS] });
-  const [deleteSale] = useMutation(DELETE_SALE, { refetchQueries: [SALES, DASHBOARD_STATS] });
   const [createCategory, { loading: savingCategory }] = useMutation(CREATE_CATEGORY, { refetchQueries: [CATEGORIES] });
   const [updateCategory] = useMutation(UPDATE_CATEGORY, { refetchQueries: [CATEGORIES] });
   const [deleteCategory] = useMutation(DELETE_CATEGORY, { refetchQueries: [CATEGORIES, PRODUCTS] });
   const [createProduct, { loading: savingProduct }] = useMutation(CREATE_PRODUCT, { refetchQueries: [PRODUCTS] });
   const [updateProduct] = useMutation(UPDATE_PRODUCT, { refetchQueries: [PRODUCTS] });
   const [deleteProduct] = useMutation(DELETE_PRODUCT, { refetchQueries: [PRODUCTS] });
-  const { data: statsData } = useQuery<{ dashboardStats: { totalSalesAmount: number; totalOrders: number; fruitsAmount: number; vegetablesAmount: number } }>(DASHBOARD_STATS, { skip: !token, fetchPolicy: "network-only" });
-  const { data: salesData } = useQuery<{ sales: Array<{ id: string; itemName: string; category: string; quantityKg: number; unitPrice: number; totalPrice: number }> }>(SALES, { skip: !token, fetchPolicy: "network-only" });
+  const { data: statsData } = useQuery<{ dashboardStats: { cashAmount: number; upiAmount: number; totalAmount: number; cashTransactions: number; upiTransactions: number; topSellingItems: Array<{ itemName: string; totalAmount: number; transactionCount: number }>; recentTransactions: Array<{ id: string; itemSummary: string; itemCount: number; totalPrice: number; paymentMode: string }> } }>(DASHBOARD_STATS, { skip: !token, fetchPolicy: "network-only", variables: { filter: { preset: datePreset } } });
+  const { data: salesData } = useQuery<{ sales: Array<{ id: string; itemName: string; quantityValue: number; quantityUnit: string; paymentMode: string; costPrice: number; sellingPrice: number; totalPrice: number }> }>(SALES, { skip: !token, fetchPolicy: "network-only" });
   const { data: categoriesData } = useQuery<{ categories: Array<{ id: string; name: string }> }>(CATEGORIES, { skip: !token, fetchPolicy: "network-only" });
   const { data: productsData } = useQuery<{ products: Array<{ id: string; name: string; pluNo: number; sellingPrice: number; quantityValue: number; quantityUnit: "kg" | "g" | "l" | "ml" | "nos"; category: { id: string; name: string } }> }>(PRODUCTS, { skip: !token, fetchPolicy: "network-only" });
   const stats = useMemo(() => statsData?.dashboardStats, [statsData]);
@@ -151,12 +132,6 @@ function App() {
     } catch {
       setError("Invalid email or password.");
     }
-  };
-
-  const handleCreateSale = async () => {
-    await createSale({ variables: { input: saleInput } });
-    setSaleInput(defaultSale);
-    setMessage("Sale added successfully.");
   };
 
   const handleSaveCategory = async () => {
@@ -321,14 +296,15 @@ function App() {
                 <DashboardPage
                   stats={stats}
                   sales={sales}
-                  saleInput={saleInput}
-                  savingSale={savingSale}
-                  onChangeSaleInput={setSaleInput}
-                  onCreateSale={handleCreateSale}
-                  onDeleteSale={async (id) => {
-                    await deleteSale({ variables: { id } });
-                  }}
+                  datePreset={datePreset}
+                  onDatePresetChange={setDatePreset}
                 />
+              }
+            />
+            <Route
+              path="/sales/new"
+              element={
+                <AddSalePage />
               }
             />
             <Route
