@@ -7,6 +7,7 @@ export const REGISTER = gql`
       user {
         id
         name
+        shopName
         email
       }
     }
@@ -20,6 +21,7 @@ export const LOGIN = gql`
       user {
         id
         name
+        shopName
         email
       }
     }
@@ -62,5 +64,75 @@ export const CREATE_SALE = gql`
 export const DELETE_SALE = gql`
   mutation DeleteSale($id: ID!) {
     deleteSale(id: $id)
+  }
+`;
+
+export const CATEGORIES = gql`
+  query Categories {
+    categories {
+      id
+      name
+    }
+  }
+`;
+
+export const CREATE_CATEGORY = gql`
+  mutation CreateCategory($input: CreateCategoryInput!) {
+    createCategory(input: $input) {
+      id
+    }
+  }
+`;
+
+export const UPDATE_CATEGORY = gql`
+  mutation UpdateCategory($id: ID!, $input: UpdateCategoryInput!) {
+    updateCategory(id: $id, input: $input) {
+      id
+    }
+  }
+`;
+
+export const DELETE_CATEGORY = gql`
+  mutation DeleteCategory($id: ID!) {
+    deleteCategory(id: $id)
+  }
+`;
+
+export const PRODUCTS = gql`
+  query Products {
+    products {
+      id
+      name
+      pluNo
+      sellingPrice
+      quantityValue
+      quantityUnit
+      category {
+        id
+        name
+      }
+    }
+  }
+`;
+
+export const CREATE_PRODUCT = gql`
+  mutation CreateProduct($input: CreateProductInput!) {
+    createProduct(input: $input) {
+      id
+    }
+  }
+`;
+
+export const UPDATE_PRODUCT = gql`
+  mutation UpdateProduct($id: ID!, $input: UpdateProductInput!) {
+    updateProduct(id: $id, input: $input) {
+      id
+    }
+  }
+`;
+
+export const DELETE_PRODUCT = gql`
+  mutation DeleteProduct($id: ID!) {
+    deleteProduct(id: $id)
   }
 `;
