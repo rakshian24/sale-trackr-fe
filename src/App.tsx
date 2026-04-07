@@ -14,7 +14,7 @@ import {
   Toolbar,
   Typography
 } from "@mui/material";
-import { useMutation, useQuery } from "@apollo/client/react";
+import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
 import { CREATE_SALE, DASHBOARD_STATS, DELETE_SALE, LOGIN, REGISTER, SALES } from "./lib/graphql";
 
 type SaleInput = {
@@ -34,6 +34,7 @@ const defaultSale: SaleInput = {
 };
 
 function App() {
+  const apolloClient = useApolloClient();
   const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -46,12 +47,13 @@ function App() {
   const [login, { loading: loggingIn }] = useMutation(LOGIN);
   const [createSale, { loading: savingSale }] = useMutation(CREATE_SALE, { refetchQueries: [SALES, DASHBOARD_STATS] });
   const [deleteSale] = useMutation(DELETE_SALE, { refetchQueries: [SALES, DASHBOARD_STATS] });
-  const { data: statsData } = useQuery<{ dashboardStats: { totalSalesAmount: number; totalOrders: number; fruitsAmount: number; vegetablesAmount: number } }>(DASHBOARD_STATS, { skip: !token });
-  const { data: salesData } = useQuery<{ sales: Array<{ id: string; itemName: string; category: string; quantityKg: number; unitPrice: number; totalPrice: number }> }>(SALES, { skip: !token });
+  const { data: statsData } = useQuery<{ dashboardStats: { totalSalesAmount: number; totalOrders: number; fruitsAmount: number; vegetablesAmount: number } }>(DASHBOARD_STATS, { skip: !token, fetchPolicy: "network-only" });
+  const { data: salesData } = useQuery<{ sales: Array<{ id: string; itemName: string; category: string; quantityKg: number; unitPrice: number; totalPrice: number }> }>(SALES, { skip: !token, fetchPolicy: "network-only" });
   const stats = useMemo(() => statsData?.dashboardStats, [statsData]);
   const sales = salesData?.sales ?? [];
 
-  const storeToken = (nextToken: string) => {
+  const storeToken = async (nextToken: string) => {
+    await apolloClient.clearStore();
     localStorage.setItem("token", nextToken);
     setToken(nextToken);
     setError("");
@@ -61,7 +63,7 @@ function App() {
   const handleRegister = async () => {
     try {
       const { data } = await register({ variables: { input: { name, email, password } } }) as { data?: { register?: { token: string } } };
-      if (data?.register?.token) storeToken(data.register.token);
+      if (data?.register?.token) await storeToken(data.register.token);
     } catch {
       setError("Unable to register.");
     }
@@ -70,7 +72,7 @@ function App() {
   const handleLogin = async () => {
     try {
       const { data } = await login({ variables: { input: { email, password } } }) as { data?: { login?: { token: string } } };
-      if (data?.login?.token) storeToken(data.login.token);
+      if (data?.login?.token) await storeToken(data.login.token);
     } catch {
       setError("Invalid email or password.");
     }
@@ -82,8 +84,9 @@ function App() {
     setMessage("Sale added successfully.");
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     localStorage.removeItem("token");
+    await apolloClient.clearStore();
     setToken(null);
     setMessage("");
   };
