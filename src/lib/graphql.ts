@@ -41,6 +41,14 @@ export const DASHBOARD_STATS = gql`
         totalAmount
         transactionCount
       }
+      topTransactions {
+        id
+        itemSummary
+        itemCount
+        totalPrice
+        paymentMode
+        soldAt
+      }
       recentTransactions {
         id
         itemSummary
@@ -123,6 +131,7 @@ export const PRODUCTS = gql`
       id
       name
       pluNo
+      costPrice
       sellingPrice
       quantityValue
       quantityUnit
@@ -139,6 +148,7 @@ export const SEARCH_PRODUCTS = gql`
     searchProducts(term: $term) {
       id
       name
+      costPrice
       sellingPrice
       quantityUnit
     }
@@ -150,6 +160,7 @@ export const CREATE_PRODUCT = gql`
     createProduct(input: $input) {
       id
       name
+      costPrice
       sellingPrice
       quantityUnit
     }

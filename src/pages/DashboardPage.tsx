@@ -33,6 +33,13 @@ type DashboardStats = {
     totalAmount: number;
     transactionCount: number;
   }>;
+  topTransactions: Array<{
+    id: string;
+    itemSummary: string;
+    itemCount: number;
+    totalPrice: number;
+    paymentMode: string;
+  }>;
   recentTransactions: Array<{
     id: string;
     itemSummary: string;
@@ -102,7 +109,7 @@ export default function DashboardPage({
             <CardContent>
               <Typography>Total Amount</Typography>
               <Typography variant="h5">
-                Rs {stats?.totalAmount?.toFixed(2) ?? "0.00"}
+                ₹ {stats?.totalAmount?.toFixed(2) ?? "0.00"}
               </Typography>
             </CardContent>
           </Card>
@@ -112,7 +119,7 @@ export default function DashboardPage({
             <CardContent>
               <Typography>Cash Amount</Typography>
               <Typography variant="h5">
-                Rs {stats?.cashAmount?.toFixed(2) ?? "0.00"}
+                ₹ {stats?.cashAmount?.toFixed(2) ?? "0.00"}
               </Typography>
             </CardContent>
           </Card>
@@ -122,7 +129,7 @@ export default function DashboardPage({
             <CardContent>
               <Typography>UPI Amount</Typography>
               <Typography variant="h5">
-                Rs {stats?.upiAmount?.toFixed(2) ?? "0.00"}
+                ₹ {stats?.upiAmount?.toFixed(2) ?? "0.00"}
               </Typography>
             </CardContent>
           </Card>
@@ -166,8 +173,44 @@ export default function DashboardPage({
               >
                 <Typography>{item.itemName}</Typography>
                 <Typography>
-                  Rs {item.totalAmount.toFixed(2)} ({item.transactionCount})
+                  ₹ {item.totalAmount.toFixed(2)} ({item.transactionCount})
                 </Typography>
+              </Box>
+            ))}
+          </Stack>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardContent>
+          <Typography variant="h5" gutterBottom>
+            Top 5 Transactions
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+            Highest bill totals in the selected period
+          </Typography>
+          <Stack spacing={1.5}>
+            {(stats?.topTransactions ?? []).map((sale) => (
+              <Box
+                key={sale.id}
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  p: 1.5,
+                  border: "1px solid #e7efe8",
+                  borderRadius: 2,
+                }}
+              >
+                <Box>
+                  <Typography fontWeight={600}>Items: {sale.itemSummary}</Typography>
+                  <Typography variant="body2">
+                    {sale.itemCount} item(s) | {sale.paymentMode}
+                  </Typography>
+                </Box>
+                <Box textAlign="right">
+                  <Typography fontWeight={700}>
+                    ₹ {sale.totalPrice.toFixed(2)}
+                  </Typography>
+                </Box>
               </Box>
             ))}
           </Stack>
@@ -204,7 +247,7 @@ export default function DashboardPage({
                 </Box>
                 <Box textAlign="right">
                   <Typography fontWeight={700}>
-                    Rs {sale.totalPrice.toFixed(2)}
+                    ₹ {sale.totalPrice.toFixed(2)}
                   </Typography>
                 </Box>
               </Box>

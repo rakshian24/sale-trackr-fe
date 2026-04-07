@@ -28,7 +28,7 @@ export default function CategoriesPage({
   return (
     <Card>
       <CardContent>
-        <Typography variant="h5" gutterBottom>Category CRUD</Typography>
+        <Typography variant="h5" gutterBottom>Category</Typography>
         <Stack spacing={2}>
           <TextField label="Category Name" value={categoryName} onChange={(e) => onChangeCategoryName(e.target.value)} fullWidth error={Boolean(categoryFieldError)} helperText={categoryFieldError} />
           <Button variant="contained" onClick={() => void onSaveCategory()} disabled={savingCategory}>
