@@ -4,11 +4,14 @@ import {
   Card,
   CardContent,
   Grid,
+  IconButton,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
+import { FaPencil } from "react-icons/fa6";
+import { FaTrashAlt } from "react-icons/fa";
 
 type Category = { id: string; name: string };
 
@@ -39,7 +42,11 @@ export default function CategoriesPage({
   return (
     <Card>
       <CardContent>
-        <Typography variant="h5" gutterBottom mb={{ xs: 2, md: 3 }}>
+        <Typography
+          sx={{ fontSize: { xs: "22px", md: "24px" }, fontWeight: 600 }}
+          gutterBottom
+          mb={{ xs: 2, md: 3 }}
+        >
           {t("categories.title")}
         </Typography>
         <Stack spacing={{ xs: 2, md: 3 }}>
@@ -88,20 +95,31 @@ export default function CategoriesPage({
                 }}
               >
                 <Typography>{category.name}</Typography>
-                <Box>
-                  <Button
+                <Box sx={{ display: "flex", gap: { xs: 1, md: 2 } }}>
+                  <IconButton
                     size="small"
                     onClick={() => onEditCategory(category.id, category.name)}
+                    sx={{
+                      bgcolor: "primary.50",
+                      color: "primary.main",
+                      "&:hover": { bgcolor: "primary.100" },
+                      p: 1.5,
+                    }}
                   >
-                    {t("categories.edit")}
-                  </Button>
-                  <Button
-                    color="error"
+                    <FaPencil />
+                  </IconButton>
+                  <IconButton
                     size="small"
                     onClick={() => void onDeleteCategory(category.id)}
+                    sx={{
+                      bgcolor: "error.50",
+                      color: "error.main",
+                      "&:hover": { bgcolor: "error.100" },
+                      p: 1.5,
+                    }}
                   >
-                    {t("categories.delete")}
-                  </Button>
+                    <FaTrashAlt />
+                  </IconButton>
                 </Box>
               </Box>
             ))}

@@ -251,10 +251,14 @@ export default function AddSalePage() {
 
   return (
     <Stack spacing={{ xs: 2, md: 3 }} mb={5}>
-      <Typography variant="h5">{t("sales.title")}</Typography>
+      <Typography
+        sx={{ fontSize: { xs: "22px", md: "24px" }, fontWeight: 600 }}
+      >
+        {t("sales.title")}
+      </Typography>
       {error ? <Alert severity="error">{error}</Alert> : null}
       <Card>
-        <CardContent>
+        <CardContent sx={{ p: { xs: 2, md: 3 } }}>
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, md: 6 }}>
               <Autocomplete
@@ -331,16 +335,18 @@ export default function AddSalePage() {
                 slotProps={{ htmlInput: { min: 0 } }}
               />
             </Grid>
-            <Grid size={{ xs: 12, md: 3 }}>
-              <Button
-                fullWidth
-                sx={{ height: "100%" }}
-                variant="outlined"
-                onClick={handleAddLine}
-              >
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "flex-end",
+                width: "100%",
+              }}
+            >
+              <Button variant="outlined" onClick={handleAddLine}>
                 {t("sales.addOneMoreSale")}
               </Button>
-            </Grid>
+            </Box>
           </Grid>
         </CardContent>
       </Card>
@@ -489,8 +495,11 @@ export default function AddSalePage() {
         </DialogActions>
       </Dialog>
       <Card>
-        <CardContent>
-          <Typography variant="h6" gutterBottom>
+        <CardContent sx={{ p: { xs: 2, md: 3 } }}>
+          <Typography
+            sx={{ fontSize: { xs: "20px", md: "22px" }, fontWeight: 600 }}
+            gutterBottom
+          >
             {t("sales.itemsCurrentBill")}
           </Typography>
           <Stack spacing={1} mb={{ xs: 1, md: 3 }}>
@@ -524,7 +533,14 @@ export default function AddSalePage() {
                 <MenuItem value="UPI">{getPaymentModeLabel(t, "UPI")}</MenuItem>
               </TextField>
             </Grid>
-            <Grid size={{ xs: 12, md: 3 }}>
+            <Grid
+              size={{ xs: 12, md: 3 }}
+              sx={{
+                display: "flex",
+                justifyContent: { xs: "flex-end", md: "flex-start" },
+                ml: { xs: 0, md: 1 },
+              }}
+            >
               <Button
                 variant="contained"
                 onClick={() => void handleCompleteSale()}

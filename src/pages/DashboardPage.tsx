@@ -100,7 +100,11 @@ export default function DashboardPage({
           alignItems: "center",
         }}
       >
-        <Typography variant="h5">{t("nav.dashboard")}</Typography>
+        <Typography
+          sx={{ fontSize: { xs: "22px", md: "24px" }, fontWeight: 600 }}
+        >
+          {t("nav.dashboard")}
+        </Typography>
         <TextField
           select
           size="small"
@@ -138,7 +142,9 @@ export default function DashboardPage({
           <Card>
             <CardContent>
               <Typography>{t("dashboard.cashAmount")}</Typography>
-              <Typography variant="h5">
+              <Typography
+                sx={{ fontSize: { xs: 22, md: 24 }, fontWeight: 600 }}
+              >
                 ₹ {stats?.cashAmount?.toFixed(2) ?? "0.00"}
               </Typography>
             </CardContent>
@@ -148,7 +154,9 @@ export default function DashboardPage({
           <Card>
             <CardContent>
               <Typography>{t("dashboard.upiAmount")}</Typography>
-              <Typography variant="h5">
+              <Typography
+                sx={{ fontSize: { xs: 22, md: 24 }, fontWeight: 600 }}
+              >
                 ₹ {stats?.upiAmount?.toFixed(2) ?? "0.00"}
               </Typography>
             </CardContent>
@@ -158,7 +166,9 @@ export default function DashboardPage({
           <Card>
             <CardContent>
               <Typography>{t("dashboard.totalAmount")}</Typography>
-              <Typography variant="h5">
+              <Typography
+                sx={{ fontSize: { xs: 22, md: 24 }, fontWeight: 600 }}
+              >
                 ₹ {stats?.totalAmount?.toFixed(2) ?? "0.00"}
               </Typography>
             </CardContent>
@@ -168,7 +178,9 @@ export default function DashboardPage({
           <Card>
             <CardContent>
               <Typography>{t("dashboard.cashTransactions")}</Typography>
-              <Typography variant="h5">
+              <Typography
+                sx={{ fontSize: { xs: 22, md: 24 }, fontWeight: 600 }}
+              >
                 {stats?.cashTransactions ?? 0}
               </Typography>
             </CardContent>
@@ -178,7 +190,9 @@ export default function DashboardPage({
           <Card>
             <CardContent>
               <Typography>{t("dashboard.upiTransactions")}</Typography>
-              <Typography variant="h5">
+              <Typography
+                sx={{ fontSize: { xs: 22, md: 24 }, fontWeight: 600 }}
+              >
                 {stats?.upiTransactions ?? 0}
               </Typography>
             </CardContent>
@@ -188,7 +202,9 @@ export default function DashboardPage({
           <Card>
             <CardContent>
               <Typography>{t("dashboard.totalTransactions")}</Typography>
-              <Typography variant="h5">
+              <Typography
+                sx={{ fontSize: { xs: 22, md: 24 }, fontWeight: 600 }}
+              >
                 {(stats?.cashTransactions ?? 0) + (stats?.upiTransactions ?? 0)}
               </Typography>
             </CardContent>
@@ -202,7 +218,10 @@ export default function DashboardPage({
       </Box>
       <Card>
         <CardContent sx={{ p: { xs: 2, md: 3 } }}>
-          <Typography variant="h5" gutterBottom>
+          <Typography
+            sx={{ fontSize: { xs: "20px", md: "22px" }, fontWeight: 600 }}
+            gutterBottom
+          >
             {t("dashboard.topSellingItems")}
           </Typography>
           <Stack spacing={1}>
@@ -235,7 +254,10 @@ export default function DashboardPage({
       </Card>
       <Card>
         <CardContent sx={{ p: { xs: 2, md: 3 } }}>
-          <Typography variant="h5" gutterBottom>
+          <Typography
+            sx={{ fontSize: { xs: "20px", md: "22px" }, fontWeight: 600 }}
+            gutterBottom
+          >
             {t("dashboard.topTransactions")}
           </Typography>
           <Stack spacing={1.5}>
@@ -282,7 +304,10 @@ export default function DashboardPage({
       </Card>
       <Card>
         <CardContent sx={{ p: { xs: 2, md: 3 } }}>
-          <Typography variant="h5" gutterBottom>
+          <Typography
+            sx={{ fontSize: { xs: "20px", md: "22px" }, fontWeight: 600 }}
+            gutterBottom
+          >
             {t("dashboard.recentTransactions")}
           </Typography>
           <Stack spacing={1.5}>

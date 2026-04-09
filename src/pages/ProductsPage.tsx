@@ -10,6 +10,7 @@ import {
   DialogContent,
   DialogTitle,
   Grid,
+  IconButton,
   MenuItem,
   Stack,
   TextField,
@@ -18,6 +19,8 @@ import {
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
+import { FaPencil } from "react-icons/fa6";
+import { FaTrashAlt } from "react-icons/fa";
 import { getUnitLabel } from "../lib/i18nFormat";
 
 type Category = { id: string; name: string };
@@ -96,6 +99,12 @@ export default function ProductsPage({
   const { t } = useTranslation();
   const [openCategoryDialog, setOpenCategoryDialog] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
+  const parsePositiveNumber = (value: string): number | "" => {
+    if (value === "") return "";
+    const parsed = Number(value);
+    if (Number.isNaN(parsed) || parsed <= 0) return "";
+    return parsed;
+  };
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -109,9 +118,13 @@ export default function ProductsPage({
   };
 
   return (
-    <Card>
+    <Card sx={{ mb: 5 }}>
       <CardContent>
-        <Typography variant="h5" gutterBottom mb={{ xs: 2, md: 3 }}>
+        <Typography
+          sx={{ fontSize: { xs: "22px", md: "24px" }, fontWeight: 600 }}
+          gutterBottom
+          mb={{ xs: 2, md: 3 }}
+        >
           {t("products.title")}
         </Typography>
         <Stack spacing={{ xs: 2, md: 3 }}>
@@ -158,39 +171,81 @@ export default function ProductsPage({
               <TextField
                 label={t("products.costPrice")}
                 type="number"
-                value={productCostPrice}
-                onChange={(e) =>
-                  onChangeProductCostPrice(Number(e.target.value))
-                }
+                value={productCostPrice <= 0 ? "" : productCostPrice}
+                onWheel={(e) => e.currentTarget.blur()}
+                onChange={(e) => {
+                  const nextValue = parsePositiveNumber(e.target.value);
+                  if (e.target.value !== "" && nextValue === "") return;
+                  onChangeProductCostPrice(nextValue === "" ? 0 : nextValue);
+                }}
                 fullWidth
                 error={Boolean(productFieldErrors.productCostPrice)}
                 helperText={productFieldErrors.productCostPrice}
+                slotProps={{ htmlInput: { min: 0 } }}
+                sx={{
+                  "& input[type=number]": {
+                    MozAppearance: "textfield",
+                  },
+                  "& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button":
+                    {
+                      WebkitAppearance: "none",
+                      margin: 0,
+                    },
+                }}
               />
             </Grid>
             <Grid size={{ xs: 12, md: 4 }}>
               <TextField
                 label={t("products.sellingPrice")}
                 type="number"
-                value={productSellingPrice}
-                onChange={(e) =>
-                  onChangeProductSellingPrice(Number(e.target.value))
-                }
+                value={productSellingPrice <= 0 ? "" : productSellingPrice}
+                onWheel={(e) => e.currentTarget.blur()}
+                onChange={(e) => {
+                  const nextValue = parsePositiveNumber(e.target.value);
+                  if (e.target.value !== "" && nextValue === "") return;
+                  onChangeProductSellingPrice(nextValue === "" ? 0 : nextValue);
+                }}
                 fullWidth
                 error={Boolean(productFieldErrors.productSellingPrice)}
                 helperText={productFieldErrors.productSellingPrice}
+                slotProps={{ htmlInput: { min: 0 } }}
+                sx={{
+                  "& input[type=number]": {
+                    MozAppearance: "textfield",
+                  },
+                  "& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button":
+                    {
+                      WebkitAppearance: "none",
+                      margin: 0,
+                    },
+                }}
               />
             </Grid>
             <Grid size={{ xs: 12, md: 4 }}>
               <TextField
                 label={t("products.quantityValue")}
                 type="number"
-                value={productQuantityValue}
-                onChange={(e) =>
-                  onChangeProductQuantityValue(Number(e.target.value))
-                }
+                value={productQuantityValue <= 0 ? "" : productQuantityValue}
+                onWheel={(e) => e.currentTarget.blur()}
+                onChange={(e) => {
+                  const nextValue = parsePositiveNumber(e.target.value);
+                  if (e.target.value !== "" && nextValue === "") return;
+                  onChangeProductQuantityValue(nextValue === "" ? 0 : nextValue);
+                }}
                 fullWidth
                 error={Boolean(productFieldErrors.productQuantityValue)}
                 helperText={productFieldErrors.productQuantityValue}
+                slotProps={{ htmlInput: { min: 0 } }}
+                sx={{
+                  "& input[type=number]": {
+                    MozAppearance: "textfield",
+                  },
+                  "& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button":
+                    {
+                      WebkitAppearance: "none",
+                      margin: 0,
+                    },
+                }}
               />
             </Grid>
           </Grid>
@@ -275,17 +330,31 @@ export default function ProductsPage({
                     })}
                   </Typography>
                 </Box>
-                <Box>
-                  <Button size="small" onClick={() => onEditProduct(product)}>
-                    {t("products.edit")}
-                  </Button>
-                  <Button
-                    color="error"
+                <Box sx={{ display: "flex", gap: { xs: 1, md: 2 } }}>
+                  <IconButton
+                    size="small"
+                    onClick={() => onEditProduct(product)}
+                    sx={{
+                      bgcolor: "primary.50",
+                      color: "primary.main",
+                      "&:hover": { bgcolor: "primary.100" },
+                      p: 1.5,
+                    }}
+                  >
+                    <FaPencil />
+                  </IconButton>
+                  <IconButton
                     size="small"
                     onClick={() => void onDeleteProduct(product.id)}
+                    sx={{
+                      bgcolor: "error.50",
+                      color: "error.main",
+                      "&:hover": { bgcolor: "error.100" },
+                      p: 1.5,
+                    }}
                   >
-                    {t("products.delete")}
-                  </Button>
+                    <FaTrashAlt />
+                  </IconButton>
                 </Box>
               </Box>
             ))}

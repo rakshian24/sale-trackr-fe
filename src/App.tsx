@@ -412,7 +412,13 @@ function App() {
       <Box>
         <AppBar position="static" elevation={0}>
           <Toolbar>
-            <Typography variant="h6" sx={{ flexGrow: 1 }}>
+            <Typography
+              sx={{
+                flexGrow: 1,
+                fontSize: { xs: "22px", md: "24px" },
+                fontWeight: "600",
+              }}
+            >
               {t("appName")}
             </Typography>
             <TextField
@@ -546,6 +552,7 @@ function App() {
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   marginRight: 4,
+                  fontSize: { xs: "22px", md: "24px" },
                 }}
               >
                 {t("appName")}
@@ -565,8 +572,27 @@ function App() {
                       minWidth: 110,
                       bgcolor: "rgba(255,255,255,0.12)",
                       borderRadius: 1,
-                      "& .MuiInputBase-input": { color: "white" },
-                      "& .MuiSvgIcon-root": { color: "white" },
+                      "& .MuiSelect-select": {
+                        color: "white",
+                        fontSize: { xs: "14px", md: "16px" },
+                      },
+                      "& .MuiSvgIcon-root": {
+                        color: "white",
+                        fontSize: { xs: "14px", md: "16px" },
+                      },
+                    }}
+                    slotProps={{
+                      select: {
+                        MenuProps: {
+                          PaperProps: {
+                            sx: {
+                              "& .MuiMenuItem-root": {
+                                fontSize: { xs: "14px", md: "16px" },
+                              },
+                            },
+                          },
+                        },
+                      },
                     }}
                     aria-label={t("language")}
                   >
