@@ -85,6 +85,7 @@ export default function DashboardPage({
   onDatePresetChange,
 }: Props) {
   const { t } = useTranslation();
+  const topSellingItems = stats?.topSellingItems ?? [];
   const topTransactions = stats?.topTransactions ?? [];
   const recentTransactions = stats?.recentTransactions ?? sales.slice(0, 5);
   const theme = useTheme();
@@ -205,8 +206,8 @@ export default function DashboardPage({
             {t("dashboard.topSellingItems")}
           </Typography>
           <Stack spacing={1}>
-            {stats?.topSellingItems?.length > 0 ? (
-              (stats?.topSellingItems ?? []).map((item) => (
+            {topSellingItems.length > 0 ? (
+              topSellingItems.map((item) => (
                 <Box
                   key={item.itemName}
                   sx={{ display: "flex", justifyContent: "space-between" }}
