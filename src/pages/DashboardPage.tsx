@@ -8,8 +8,16 @@ import {
   Stack,
   TextField,
   Typography,
+  useMediaQuery,
 } from "@mui/material";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { FaBasketShopping } from "react-icons/fa6";
+import { FaRupeeSign } from "react-icons/fa";
+import { FaClipboardList } from "react-icons/fa";
+import { useTheme } from "@mui/material/styles";
+import { getPaymentModeLabel, getUnitLabel } from "../lib/i18nFormat";
+import ZeroState from "../components/ZeroState";
 
 type SaleItem = {
   id: string;
@@ -76,8 +84,14 @@ export default function DashboardPage({
   datePreset,
   onDatePresetChange,
 }: Props) {
+  const { t } = useTranslation();
+  const topTransactions = stats?.topTransactions ?? [];
+  const recentTransactions = stats?.recentTransactions ?? sales.slice(0, 5);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   return (
-    <Stack spacing={3}>
+    <Stack spacing={3} mb={5}>
       <Box
         sx={{
           display: "flex",
@@ -85,7 +99,7 @@ export default function DashboardPage({
           alignItems: "center",
         }}
       >
-        <Typography variant="h5">Dashboard</Typography>
+        <Typography variant="h5">{t("nav.dashboard")}</Typography>
         <TextField
           select
           size="small"
@@ -93,63 +107,88 @@ export default function DashboardPage({
           onChange={(e) =>
             onDatePresetChange(e.target.value as Props["datePreset"])
           }
-          sx={{ minWidth: 170, bgcolor: "white" }}
+          sx={{
+            minWidth: 170,
+            bgcolor: "white",
+            borderRadius: "12px",
+            boxShadow: "rgba(0, 0, 0, 0.1) 0.25px 0.5px 10px",
+          }}
         >
-          <MenuItem value="TODAY">Today</MenuItem>
-          <MenuItem value="YESTERDAY">Yesterday</MenuItem>
-          <MenuItem value="THIS_WEEK">This Week</MenuItem>
-          <MenuItem value="LAST_WEEK">Last Week</MenuItem>
-          <MenuItem value="THIS_MONTH">This Month</MenuItem>
-          <MenuItem value="LAST_MONTH">Last Month</MenuItem>
+          <MenuItem value="TODAY">{t("dashboard.datePresets.TODAY")}</MenuItem>
+          <MenuItem value="YESTERDAY">
+            {t("dashboard.datePresets.YESTERDAY")}
+          </MenuItem>
+          <MenuItem value="THIS_WEEK">
+            {t("dashboard.datePresets.THIS_WEEK")}
+          </MenuItem>
+          <MenuItem value="LAST_WEEK">
+            {t("dashboard.datePresets.LAST_WEEK")}
+          </MenuItem>
+          <MenuItem value="THIS_MONTH">
+            {t("dashboard.datePresets.THIS_MONTH")}
+          </MenuItem>
+          <MenuItem value="LAST_MONTH">
+            {t("dashboard.datePresets.LAST_MONTH")}
+          </MenuItem>
         </TextField>
       </Box>
       <Grid container spacing={2}>
-        <Grid size={{ xs: 12, md: 3 }}>
+        <Grid size={{ xs: 6, md: 3 }}>
           <Card>
             <CardContent>
-              <Typography>Total Amount</Typography>
-              <Typography variant="h5">
-                ₹ {stats?.totalAmount?.toFixed(2) ?? "0.00"}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid size={{ xs: 12, md: 3 }}>
-          <Card>
-            <CardContent>
-              <Typography>Cash Amount</Typography>
+              <Typography>{t("dashboard.cashAmount")}</Typography>
               <Typography variant="h5">
                 ₹ {stats?.cashAmount?.toFixed(2) ?? "0.00"}
               </Typography>
             </CardContent>
           </Card>
         </Grid>
-        <Grid size={{ xs: 12, md: 3 }}>
+        <Grid size={{ xs: 6, md: 3 }}>
           <Card>
             <CardContent>
-              <Typography>UPI Amount</Typography>
+              <Typography>{t("dashboard.upiAmount")}</Typography>
               <Typography variant="h5">
                 ₹ {stats?.upiAmount?.toFixed(2) ?? "0.00"}
               </Typography>
             </CardContent>
           </Card>
         </Grid>
-        <Grid size={{ xs: 12, md: 3 }}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Card>
             <CardContent>
-              <Typography>Cash Txn</Typography>
+              <Typography>{t("dashboard.totalAmount")}</Typography>
+              <Typography variant="h5">
+                ₹ {stats?.totalAmount?.toFixed(2) ?? "0.00"}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid size={{ xs: 6, md: 3 }}>
+          <Card>
+            <CardContent>
+              <Typography>{t("dashboard.cashTransactions")}</Typography>
               <Typography variant="h5">
                 {stats?.cashTransactions ?? 0}
               </Typography>
             </CardContent>
           </Card>
         </Grid>
-        <Grid size={{ xs: 12, md: 3 }}>
+        <Grid size={{ xs: 6, md: 3 }}>
           <Card>
             <CardContent>
-              <Typography>UPI Txn</Typography>
+              <Typography>{t("dashboard.upiTransactions")}</Typography>
               <Typography variant="h5">
                 {stats?.upiTransactions ?? 0}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Card>
+            <CardContent>
+              <Typography>{t("dashboard.totalTransactions")}</Typography>
+              <Typography variant="h5">
+                {(stats?.cashTransactions ?? 0) + (stats?.upiTransactions ?? 0)}
               </Typography>
             </CardContent>
           </Card>
@@ -157,101 +196,138 @@ export default function DashboardPage({
       </Grid>
       <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
         <Button variant="contained" component={Link} to="/sales/new">
-          Add Sale
+          {t("dashboard.addSale")}
         </Button>
       </Box>
       <Card>
-        <CardContent>
-          <Typography variant="h6" gutterBottom>
-            Top 5 Selling Items
+        <CardContent sx={{ p: { xs: 2, md: 3 } }}>
+          <Typography variant="h5" gutterBottom>
+            {t("dashboard.topSellingItems")}
           </Typography>
           <Stack spacing={1}>
-            {(stats?.topSellingItems ?? []).map((item) => (
-              <Box
-                key={item.itemName}
-                sx={{ display: "flex", justifyContent: "space-between" }}
-              >
-                <Typography>{item.itemName}</Typography>
-                <Typography>
-                  ₹ {item.totalAmount.toFixed(2)} ({item.transactionCount})
-                </Typography>
-              </Box>
-            ))}
+            {stats?.topSellingItems?.length > 0 ? (
+              (stats?.topSellingItems ?? []).map((item) => (
+                <Box
+                  key={item.itemName}
+                  sx={{ display: "flex", justifyContent: "space-between" }}
+                >
+                  <Typography>{item.itemName}</Typography>
+                  <Typography>
+                    ₹ {item.totalAmount.toFixed(2)} ({item.transactionCount})
+                  </Typography>
+                </Box>
+              ))
+            ) : (
+              <ZeroState
+                title={t("dashboard.topSellingItemsZeroState.title")}
+                description={t(
+                  "dashboard.topSellingItemsZeroState.description",
+                )}
+                icon={
+                  <FaBasketShopping size={isMobile ? 50 : 80} color="#A8E2C7" />
+                }
+                iconBgColor={"#E9FAEF"}
+              />
+            )}
           </Stack>
         </CardContent>
       </Card>
       <Card>
-        <CardContent>
+        <CardContent sx={{ p: { xs: 2, md: 3 } }}>
           <Typography variant="h5" gutterBottom>
-            Top 5 Transactions
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-            Highest bill totals in the selected period
+            {t("dashboard.topTransactions")}
           </Typography>
           <Stack spacing={1.5}>
-            {(stats?.topTransactions ?? []).map((sale) => (
-              <Box
-                key={sale.id}
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  p: 1.5,
-                  border: "1px solid #e7efe8",
-                  borderRadius: 2,
-                }}
-              >
-                <Box>
-                  <Typography fontWeight={600}>Items: {sale.itemSummary}</Typography>
-                  <Typography variant="body2">
-                    {sale.itemCount} item(s) | {sale.paymentMode}
-                  </Typography>
+            {topTransactions.length > 0 ? (
+              topTransactions.map((sale) => (
+                <Box
+                  key={sale.id}
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    p: 1.5,
+                    border: "1px solid #e7efe8",
+                    borderRadius: 2,
+                  }}
+                >
+                  <Box>
+                    <Typography fontWeight={600}>
+                      {t("dashboard.items")} {sale.itemSummary}
+                    </Typography>
+                    <Typography variant="body2">
+                      {t("dashboard.itemCount", { count: sale.itemCount })} |{" "}
+                      {getPaymentModeLabel(t, sale.paymentMode)}
+                    </Typography>
+                  </Box>
+                  <Box textAlign="right">
+                    <Typography fontWeight={700}>
+                      ₹ {sale.totalPrice.toFixed(2)}
+                    </Typography>
+                  </Box>
                 </Box>
-                <Box textAlign="right">
-                  <Typography fontWeight={700}>
-                    ₹ {sale.totalPrice.toFixed(2)}
-                  </Typography>
-                </Box>
-              </Box>
-            ))}
+              ))
+            ) : (
+              <ZeroState
+                title={t("dashboard.topTransactionsZeroState.title")}
+                description={t(
+                  "dashboard.topTransactionsZeroState.description",
+                )}
+                icon={<FaRupeeSign size={isMobile ? 50 : 80} color="#F7DFA1" />}
+                iconBgColor="#FEFCE8"
+              />
+            )}
           </Stack>
         </CardContent>
       </Card>
       <Card>
-        <CardContent>
+        <CardContent sx={{ p: { xs: 2, md: 3 } }}>
           <Typography variant="h5" gutterBottom>
-            Recent 5 Transactions
+            {t("dashboard.recentTransactions")}
           </Typography>
           <Stack spacing={1.5}>
-            {(stats?.recentTransactions ?? sales.slice(0, 5)).map((sale) => (
-              <Box
-                key={sale.id}
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  p: 1.5,
-                  border: "1px solid #e7efe8",
-                  borderRadius: 2,
-                }}
-              >
-                <Box>
-                  <Typography fontWeight={600}>
-                    Items:{" "}
-                    {"itemSummary" in sale ? sale.itemSummary : sale.itemName}
-                  </Typography>
-                  <Typography variant="body2">
-                    {"itemCount" in sale
-                      ? `${sale.itemCount} item(s)`
-                      : `${sale.quantityValue} ${sale.quantityUnit}`}{" "}
-                    | {sale.paymentMode}
-                  </Typography>
+            {recentTransactions.length > 0 ? (
+              recentTransactions.map((sale) => (
+                <Box
+                  key={sale.id}
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    p: 1.5,
+                    border: "1px solid #e7efe8",
+                    borderRadius: 2,
+                  }}
+                >
+                  <Box>
+                    <Typography fontWeight={600}>
+                      {t("dashboard.items")}{" "}
+                      {"itemSummary" in sale ? sale.itemSummary : sale.itemName}
+                    </Typography>
+                    <Typography variant="body2">
+                      {"itemCount" in sale
+                        ? t("dashboard.itemCount", { count: sale.itemCount })
+                        : `${sale.quantityValue} ${getUnitLabel(t, sale.quantityUnit)}`}{" "}
+                      | {getPaymentModeLabel(t, sale.paymentMode)}
+                    </Typography>
+                  </Box>
+                  <Box textAlign="right">
+                    <Typography fontWeight={700}>
+                      ₹ {sale.totalPrice.toFixed(2)}
+                    </Typography>
+                  </Box>
                 </Box>
-                <Box textAlign="right">
-                  <Typography fontWeight={700}>
-                    ₹ {sale.totalPrice.toFixed(2)}
-                  </Typography>
-                </Box>
-              </Box>
-            ))}
+              ))
+            ) : (
+              <ZeroState
+                title={t("dashboard.recentTransactionsZeroState.title")}
+                description={t(
+                  "dashboard.recentTransactionsZeroState.description",
+                )}
+                icon={
+                  <FaClipboardList size={isMobile ? 50 : 80} color="#B0C9FB" />
+                }
+                iconBgColor="#EFF6FF"
+              />
+            )}
           </Stack>
         </CardContent>
       </Card>

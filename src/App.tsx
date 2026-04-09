@@ -15,6 +15,7 @@ import {
   List,
   ListItemButton,
   ListItemText,
+  MenuItem,
   Stack,
   TextField,
   Toolbar,
@@ -24,6 +25,7 @@ import {
 } from "@mui/material";
 import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
 import { BrowserRouter, Link, Navigate, Route, Routes } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   CATEGORIES,
   CREATE_CATEGORY,
@@ -38,12 +40,14 @@ import {
   UPDATE_CATEGORY,
   UPDATE_PRODUCT,
 } from "./lib/graphql";
+import { SUPPORTED_LANGUAGES, type SupportedLanguage } from "./i18n";
 import DashboardPage from "./pages/DashboardPage";
 import CategoriesPage from "./pages/CategoriesPage";
 import ProductsPage from "./pages/ProductsPage";
 import AddSalePage from "./pages/AddSalePage";
 
 function App() {
+  const { t, i18n } = useTranslation();
   const apolloClient = useApolloClient();
   const [token, setToken] = useState<string | null>(
     localStorage.getItem("token"),
@@ -172,6 +176,7 @@ function App() {
   const sales = salesData?.sales ?? [];
   const categories = categoriesData?.categories ?? [];
   const products = productsData?.products ?? [];
+  const language = (i18n.resolvedLanguage ?? "en") as SupportedLanguage;
 
   const getErrorMessage = (err: unknown, fallback: string): string => {
     const message = (err as { message?: string })?.message;
@@ -191,37 +196,34 @@ function App() {
     } = {};
 
     if (!productName.trim())
-      nextErrors.productName = "Product name is required";
+      nextErrors.productName = t("validation.productNameRequired");
     else if (productName.trim().length > 100)
-      nextErrors.productName = "Product name cannot exceed 100 characters";
+      nextErrors.productName = t("validation.productNameMax");
 
     if (productPluNo === "" || Number.isNaN(productPluNo))
-      nextErrors.productPluNo = "PLU number is required";
+      nextErrors.productPluNo = t("validation.pluRequired");
     else if (productPluNo <= 0 || productPluNo > 500)
-      nextErrors.productPluNo = "PLU number must be between 1 and 500";
+      nextErrors.productPluNo = t("validation.pluRange");
 
     if (
       !Number.isFinite(productCostPrice) ||
       productCostPrice <= 0 ||
       productCostPrice > 100000
     ) {
-      nextErrors.productCostPrice =
-        "Cost price must be greater than 0 and less than or equal to 100000";
+      nextErrors.productCostPrice = t("validation.costPriceRange");
     }
     if (
       !Number.isFinite(productSellingPrice) ||
       productSellingPrice <= 0 ||
       productSellingPrice > 100000
     ) {
-      nextErrors.productSellingPrice =
-        "Selling price must be greater than 0 and less than or equal to 100000";
+      nextErrors.productSellingPrice = t("validation.sellingPriceRange");
     }
     if (productQuantityValue <= 0 || productQuantityValue > 1000) {
-      nextErrors.productQuantityValue =
-        "Quantity value must be greater than 0 and less than or equal to 1000";
+      nextErrors.productQuantityValue = t("validation.quantityValueRange");
     }
     if (!productCategoryId)
-      nextErrors.productCategoryId = "Category is required";
+      nextErrors.productCategoryId = t("validation.categoryRequired");
 
     setProductFieldErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
@@ -229,9 +231,8 @@ function App() {
 
   const validateCategoryName = (value: string): string => {
     const trimmed = value.trim();
-    if (!trimmed) return "Category name is required";
-    if (trimmed.length > 100)
-      return "Category name cannot be longer than 100 characters";
+    if (!trimmed) return t("validation.categoryNameRequired");
+    if (trimmed.length > 100) return t("validation.categoryNameMax");
     return "";
   };
 
@@ -240,7 +241,7 @@ function App() {
     localStorage.setItem("token", nextToken);
     setToken(nextToken);
     setError("");
-    setMessage("Welcome! You are logged in.");
+    setMessage(t("auth.welcome"));
   };
 
   const handleRegister = async () => {
@@ -250,7 +251,7 @@ function App() {
       })) as { data?: { register?: { token: string } } };
       if (data?.register?.token) await storeToken(data.register.token);
     } catch {
-      setError("Unable to register.");
+      setError(t("auth.unableRegister"));
     }
   };
 
@@ -261,7 +262,7 @@ function App() {
       })) as { data?: { login?: { token: string } } };
       if (data?.login?.token) await storeToken(data.login.token);
     } catch {
-      setError("Invalid email or password.");
+      setError(t("auth.invalidLogin"));
     }
   };
 
@@ -276,17 +277,17 @@ function App() {
         await updateCategory({
           variables: { id: editingCategoryId, input: { name: categoryName } },
         });
-        setMessage("Category updated.");
+        setMessage(t("messages.categoryUpdated"));
       } else {
         await createCategory({ variables: { input: { name: categoryName } } });
-        setMessage("Category created.");
+        setMessage(t("messages.categoryCreated"));
       }
       setError("");
       setCategoryFieldError("");
       setCategoryName("");
       setEditingCategoryId(null);
     } catch (err) {
-      setError(getErrorMessage(err, "Unable to save category."));
+      setError(getErrorMessage(err, t("messages.unableSaveCategory")));
     }
   };
 
@@ -298,7 +299,7 @@ function App() {
 
   const handleDeleteCategory = async (id: string) => {
     await deleteCategory({ variables: { id } });
-    setMessage("Category deleted.");
+    setMessage(t("messages.categoryDeleted"));
   };
 
   const handleQuickCreateCategory = async (
@@ -317,13 +318,13 @@ function App() {
       };
       const createdId = response.data?.createCategory?.id ?? null;
       if (createdId) {
-        setMessage("Category created.");
+        setMessage(t("messages.categoryCreated"));
         setError("");
         setQuickCategoryFieldError("");
       }
       return createdId;
     } catch (err) {
-      setError(getErrorMessage(err, "Unable to save category."));
+      setError(getErrorMessage(err, t("messages.unableSaveCategory")));
       return null;
     }
   };
@@ -342,10 +343,10 @@ function App() {
     try {
       if (editingProductId) {
         await updateProduct({ variables: { id: editingProductId, input } });
-        setMessage("Product updated.");
+        setMessage(t("messages.productUpdated"));
       } else {
         await createProduct({ variables: { input } });
-        setMessage("Product created.");
+        setMessage(t("messages.productCreated"));
       }
       setError("");
       setProductFieldErrors({});
@@ -358,7 +359,7 @@ function App() {
       setProductCategoryId("");
       setEditingProductId(null);
     } catch (err) {
-      setError(getErrorMessage(err, "Unable to save product."));
+      setError(getErrorMessage(err, t("messages.unableSaveProduct")));
     }
   };
 
@@ -385,7 +386,7 @@ function App() {
 
   const handleDeleteProduct = async (id: string) => {
     await deleteProduct({ variables: { id } });
-    setMessage("Product deleted.");
+    setMessage(t("messages.productDeleted"));
   };
 
   const handleLogout = async () => {
@@ -393,6 +394,11 @@ function App() {
     await apolloClient.clearStore();
     setToken(null);
     setMessage("");
+  };
+
+  const handleLanguageChange = async (nextLanguage: SupportedLanguage) => {
+    localStorage.setItem("language", nextLanguage);
+    await i18n.changeLanguage(nextLanguage);
   };
 
   const theme = useTheme();
@@ -407,8 +413,28 @@ function App() {
         <AppBar position="static" elevation={0}>
           <Toolbar>
             <Typography variant="h6" sx={{ flexGrow: 1 }}>
-              Sales Trackr
+              {t("appName")}
             </Typography>
+            <TextField
+              select
+              size="small"
+              value={language}
+              onChange={(e) =>
+                void handleLanguageChange(e.target.value as SupportedLanguage)
+              }
+              sx={{ minWidth: 130, bgcolor: "white", borderRadius: 1 }}
+              aria-label={t("language")}
+            >
+              {SUPPORTED_LANGUAGES.map((lang) => (
+                <MenuItem key={lang} value={lang}>
+                  {lang === "en"
+                    ? t("langEnglish")
+                    : lang === "hi"
+                      ? t("langHindi")
+                      : t("langKannada")}
+                </MenuItem>
+              ))}
+            </TextField>
           </Toolbar>
         </AppBar>
         <Container sx={{ py: 4 }}>
@@ -423,29 +449,29 @@ function App() {
               <Card>
                 <CardContent>
                   <Typography variant="h5" gutterBottom>
-                    Register
+                    {t("auth.register")}
                   </Typography>
                   <Stack spacing={2}>
                     <TextField
-                      label="Name"
+                      label={t("auth.name")}
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       fullWidth
                     />
                     <TextField
-                      label="Shop Name"
+                      label={t("auth.shopName")}
                       value={shopName}
                       onChange={(e) => setShopName(e.target.value)}
                       fullWidth
                     />
                     <TextField
-                      label="Email"
+                      label={t("auth.email")}
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       fullWidth
                     />
                     <TextField
-                      label="Password"
+                      label={t("auth.password")}
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
@@ -456,7 +482,7 @@ function App() {
                       onClick={handleRegister}
                       disabled={registering}
                     >
-                      Create account
+                      {t("auth.createAccount")}
                     </Button>
                   </Stack>
                 </CardContent>
@@ -466,17 +492,17 @@ function App() {
               <Card>
                 <CardContent>
                   <Typography variant="h5" gutterBottom>
-                    Login
+                    {t("auth.login")}
                   </Typography>
                   <Stack spacing={2}>
                     <TextField
-                      label="Email"
+                      label={t("auth.email")}
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       fullWidth
                     />
                     <TextField
-                      label="Password"
+                      label={t("auth.password")}
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
@@ -488,7 +514,7 @@ function App() {
                       onClick={handleLogin}
                       disabled={loggingIn}
                     >
-                      Sign in
+                      {t("auth.signIn")}
                     </Button>
                   </Stack>
                 </CardContent>
@@ -504,94 +530,184 @@ function App() {
     <BrowserRouter>
       <Box>
         <AppBar position="static" elevation={0}>
-          <Toolbar sx={{ gap: 1, minHeight: { xs: 56 } }}>
-            <Typography
-              variant="h6"
-              component={Link}
-              to="/"
-              onClick={closeMobileNav}
-              noWrap
-              sx={{
-                flexGrow: 1,
-                color: "inherit",
-                textDecoration: "none",
-                fontWeight: 600,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-              }}
-            >
-              Sales Trackr
-            </Typography>
-            {isMobileNav ? (
-              <>
-                <IconButton
-                  color="inherit"
-                  edge="end"
-                  aria-label="Open menu"
-                  onClick={() => setMobileNavOpen(true)}
-                >
-                  <MenuIcon />
-                </IconButton>
-                <Drawer
-                  anchor="right"
-                  open={mobileNavOpen}
-                  onClose={closeMobileNav}
-                >
-                  <Box
-                    sx={{ width: 280 }}
-                    role="presentation"
-                    onClick={closeMobileNav}
+          <Container>
+            <Toolbar disableGutters sx={{ gap: 1, minHeight: { xs: 65 } }}>
+              <Typography
+                variant="h5"
+                component={Link}
+                to="/"
+                onClick={closeMobileNav}
+                noWrap
+                sx={{
+                  flexGrow: isMobileNav ? 1 : 0,
+                  color: "inherit",
+                  textDecoration: "none",
+                  fontWeight: 600,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  marginRight: 4,
+                }}
+              >
+                {t("appName")}
+              </Typography>
+              {isMobileNav ? (
+                <>
+                  <TextField
+                    select
+                    size="small"
+                    value={language}
+                    onChange={(e) =>
+                      void handleLanguageChange(
+                        e.target.value as SupportedLanguage,
+                      )
+                    }
+                    sx={{
+                      minWidth: 110,
+                      bgcolor: "rgba(255,255,255,0.12)",
+                      borderRadius: 1,
+                      "& .MuiInputBase-input": { color: "white" },
+                      "& .MuiSvgIcon-root": { color: "white" },
+                    }}
+                    aria-label={t("language")}
                   >
-                    <Box sx={{ px: 2, py: 2 }}>
-                      <Typography variant="subtitle2" color="text.secondary">
-                        Menu
-                      </Typography>
+                    {SUPPORTED_LANGUAGES.map((lang) => (
+                      <MenuItem key={lang} value={lang}>
+                        {lang === "en"
+                          ? t("langEnglish")
+                          : lang === "hi"
+                            ? t("langHindi")
+                            : t("langKannada")}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                  <IconButton
+                    color="inherit"
+                    edge="end"
+                    aria-label={t("nav.openMenu")}
+                    onClick={() => setMobileNavOpen(true)}
+                  >
+                    <MenuIcon />
+                  </IconButton>
+                  <Drawer
+                    anchor="right"
+                    open={mobileNavOpen}
+                    onClose={closeMobileNav}
+                  >
+                    <Box
+                      sx={{ width: 280 }}
+                      role="presentation"
+                      onClick={closeMobileNav}
+                    >
+                      <Box sx={{ px: 2, py: 2 }}>
+                        <Typography variant="subtitle1" color="text.secondary">
+                          {t("nav.menu")}
+                        </Typography>
+                      </Box>
+                      <Divider />
+                      <List dense>
+                        <ListItemButton component={Link} to="/">
+                          <ListItemText
+                            primary={t("nav.dashboard")}
+                            slotProps={{
+                              primary: {
+                                fontSize: "16px",
+                              },
+                            }}
+                          />
+                        </ListItemButton>
+                        <ListItemButton component={Link} to="/categories">
+                          <ListItemText
+                            primary={t("nav.categories")}
+                            slotProps={{
+                              primary: {
+                                fontSize: "16px",
+                              },
+                            }}
+                          />
+                        </ListItemButton>
+                        <ListItemButton component={Link} to="/products">
+                          <ListItemText
+                            primary={t("nav.products")}
+                            slotProps={{
+                              primary: {
+                                fontSize: "16px",
+                              },
+                            }}
+                          />
+                        </ListItemButton>
+                      </List>
+                      <Divider />
+                      <List dense>
+                        <ListItemButton
+                          onClick={() => {
+                            void handleLogout();
+                            closeMobileNav();
+                          }}
+                        >
+                          <ListItemText
+                            primary={t("nav.logout")}
+                            slotProps={{
+                              primary: {
+                                fontSize: "16px",
+                              },
+                            }}
+                          />
+                        </ListItemButton>
+                      </List>
                     </Box>
-                    <Divider />
-                    <List dense>
-                      <ListItemButton component={Link} to="/">
-                        <ListItemText primary="Dashboard" />
-                      </ListItemButton>
-                      <ListItemButton component={Link} to="/categories">
-                        <ListItemText primary="Categories" />
-                      </ListItemButton>
-                      <ListItemButton component={Link} to="/products">
-                        <ListItemText primary="Products" />
-                      </ListItemButton>
-                    </List>
-                    <Divider />
-                    <List dense>
-                      <ListItemButton
-                        onClick={() => {
-                          void handleLogout();
-                          closeMobileNav();
-                        }}
-                      >
-                        <ListItemText primary="Logout" />
-                      </ListItemButton>
-                    </List>
+                  </Drawer>
+                </>
+              ) : (
+                <>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Button component={Link} to="/" color="inherit">
+                      {t("nav.dashboard")}
+                    </Button>
+                    <Button component={Link} to="/categories" color="inherit">
+                      {t("nav.categories")}
+                    </Button>
+                    <Button component={Link} to="/products" color="inherit">
+                      {t("nav.products")}
+                    </Button>
                   </Box>
-                </Drawer>
-              </>
-            ) : (
-              <>
-                <Button component={Link} to="/" color="inherit">
-                  Dashboard
-                </Button>
-                <Button component={Link} to="/categories" color="inherit">
-                  Categories
-                </Button>
-                <Button component={Link} to="/products" color="inherit">
-                  Products
-                </Button>
-                <Button color="inherit" onClick={handleLogout}>
-                  Logout
-                </Button>
-              </>
-            )}
-          </Toolbar>
+                  <Box sx={{ flexGrow: 1 }} />
+                  <TextField
+                    select
+                    size="small"
+                    value={language}
+                    onChange={(e) =>
+                      void handleLanguageChange(
+                        e.target.value as SupportedLanguage,
+                      )
+                    }
+                    sx={{
+                      minWidth: 130,
+                      bgcolor: "rgba(255,255,255,0.12)",
+                      borderRadius: 1,
+                      "& .MuiInputBase-input": { color: "white" },
+                      "& .MuiSvgIcon-root": { color: "white" },
+                    }}
+                    aria-label={t("language")}
+                  >
+                    {SUPPORTED_LANGUAGES.map((lang) => (
+                      <MenuItem key={lang} value={lang}>
+                        {lang === "en"
+                          ? t("langEnglish")
+                          : lang === "hi"
+                            ? t("langHindi")
+                            : t("langKannada")}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                  <Button color="inherit" onClick={handleLogout}>
+                    {t("nav.logout")}
+                  </Button>
+                </>
+              )}
+            </Toolbar>
+          </Container>
         </AppBar>
-        <Container sx={{ py: 4 }}>
+        <Container sx={{ py: { xs: 2, md: 4 } }}>
           {message ? <Alert sx={{ mb: 2 }}>{message}</Alert> : null}
           {error ? (
             <Alert severity="error" sx={{ mb: 2 }}>

@@ -9,11 +9,16 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Grid,
   MenuItem,
   Stack,
   TextField,
   Typography,
+  useMediaQuery,
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import { useTranslation } from "react-i18next";
+import { getUnitLabel } from "../lib/i18nFormat";
 
 type Category = { id: string; name: string };
 type QuantityUnit = "kg" | "g" | "l" | "ml" | "nos";
@@ -88,8 +93,11 @@ export default function ProductsPage({
   productFieldErrors,
   quickCategoryFieldError,
 }: Props) {
+  const { t } = useTranslation();
   const [openCategoryDialog, setOpenCategoryDialog] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const handleCreateCategoryFromModal = async () => {
     const createdId = await onQuickCreateCategory(newCategoryName);
@@ -103,156 +111,200 @@ export default function ProductsPage({
   return (
     <Card>
       <CardContent>
-        <Typography variant="h5" gutterBottom>
-          Product
+        <Typography variant="h5" gutterBottom mb={{ xs: 2, md: 3 }}>
+          {t("products.title")}
         </Typography>
-        <Stack spacing={2}>
-          <TextField
-            label="Product Name"
-            value={productName}
-            onChange={(e) => onChangeProductName(e.target.value)}
-            fullWidth
-            error={Boolean(productFieldErrors.productName)}
-            helperText={productFieldErrors.productName}
-          />
-          <TextField
-            label="PLU No"
-            type="number"
-            value={productPluNo}
-            onChange={(e) =>
-              onChangeProductPluNo(
-                e.target.value === "" ? "" : Number(e.target.value),
-              )
-            }
-            fullWidth
-            error={Boolean(productFieldErrors.productPluNo)}
-            helperText={productFieldErrors.productPluNo}
-          />
-          <TextField
-            label="Cost Price"
-            type="number"
-            value={productCostPrice}
-            onChange={(e) => onChangeProductCostPrice(Number(e.target.value))}
-            fullWidth
-            error={Boolean(productFieldErrors.productCostPrice)}
-            helperText={productFieldErrors.productCostPrice}
-          />
-          <TextField
-            label="Selling Price"
-            type="number"
-            value={productSellingPrice}
-            onChange={(e) =>
-              onChangeProductSellingPrice(Number(e.target.value))
-            }
-            fullWidth
-            error={Boolean(productFieldErrors.productSellingPrice)}
-            helperText={productFieldErrors.productSellingPrice}
-          />
-          <TextField
-            label="Quantity Value"
-            type="number"
-            value={productQuantityValue}
-            onChange={(e) =>
-              onChangeProductQuantityValue(Number(e.target.value))
-            }
-            fullWidth
-            error={Boolean(productFieldErrors.productQuantityValue)}
-            helperText={productFieldErrors.productQuantityValue}
-          />
-          <TextField
-            select
-            label="Unit"
-            value={productQuantityUnit}
-            onChange={(e) =>
-              onChangeProductQuantityUnit(e.target.value as QuantityUnit)
-            }
-            fullWidth
-          >
-            <MenuItem value="kg">kg</MenuItem>
-            <MenuItem value="g">g</MenuItem>
-            <MenuItem value="l">l</MenuItem>
-            <MenuItem value="ml">ml</MenuItem>
-            <MenuItem value="nos">nos</MenuItem>
-          </TextField>
-          <TextField
-            select
-            label="Category"
-            value={productCategoryId}
-            onChange={(e) => onChangeProductCategoryId(e.target.value)}
-            fullWidth
-            error={Boolean(productFieldErrors.productCategoryId)}
-            helperText={productFieldErrors.productCategoryId}
-          >
-            {categories.map((category) => (
-              <MenuItem key={category.id} value={category.id}>
-                {category.name}
-              </MenuItem>
-            ))}
-          </TextField>
-          <Alert severity="info">
-            If you do not find the right category in the list, click "Create
-            Category" to add one and continue product creation.
-          </Alert>
-          <Button
-            variant="outlined"
-            onClick={() => setOpenCategoryDialog(true)}
-          >
-            + Create Category
-          </Button>
-          <Button
-            variant="contained"
-            onClick={() => void onSaveProduct()}
-            disabled={savingProduct}
-          >
-            {editingProductId ? "Update Product" : "Add Product"}
-          </Button>
-          {products.map((product) => (
-            <Box
-              key={product.id}
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                p: 1,
-                border: "1px solid #e7efe8",
-                borderRadius: 2,
-              }}
+        <Stack spacing={{ xs: 2, md: 3 }}>
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <TextField
+                label={t("products.productName")}
+                value={productName}
+                onChange={(e) => onChangeProductName(e.target.value)}
+                fullWidth
+                error={Boolean(productFieldErrors.productName)}
+                helperText={productFieldErrors.productName}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <TextField
+                label={t("products.pluNo")}
+                type="number"
+                value={productPluNo}
+                onWheel={(e) => e.currentTarget.blur()}
+                onChange={(e) =>
+                  onChangeProductPluNo(
+                    e.target.value === "" ? "" : Number(e.target.value),
+                  )
+                }
+                fullWidth
+                sx={{
+                  "& input[type=number]": {
+                    MozAppearance: "textfield",
+                  },
+                  "& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button":
+                    {
+                      WebkitAppearance: "none",
+                      margin: 0,
+                    },
+                }}
+                error={Boolean(productFieldErrors.productPluNo)}
+                helperText={productFieldErrors.productPluNo}
+              />
+            </Grid>
+          </Grid>
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, md: 4 }}>
+              <TextField
+                label={t("products.costPrice")}
+                type="number"
+                value={productCostPrice}
+                onChange={(e) =>
+                  onChangeProductCostPrice(Number(e.target.value))
+                }
+                fullWidth
+                error={Boolean(productFieldErrors.productCostPrice)}
+                helperText={productFieldErrors.productCostPrice}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, md: 4 }}>
+              <TextField
+                label={t("products.sellingPrice")}
+                type="number"
+                value={productSellingPrice}
+                onChange={(e) =>
+                  onChangeProductSellingPrice(Number(e.target.value))
+                }
+                fullWidth
+                error={Boolean(productFieldErrors.productSellingPrice)}
+                helperText={productFieldErrors.productSellingPrice}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, md: 4 }}>
+              <TextField
+                label={t("products.quantityValue")}
+                type="number"
+                value={productQuantityValue}
+                onChange={(e) =>
+                  onChangeProductQuantityValue(Number(e.target.value))
+                }
+                fullWidth
+                error={Boolean(productFieldErrors.productQuantityValue)}
+                helperText={productFieldErrors.productQuantityValue}
+              />
+            </Grid>
+          </Grid>
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <TextField
+                select
+                label={t("products.unit")}
+                value={productQuantityUnit}
+                onChange={(e) =>
+                  onChangeProductQuantityUnit(e.target.value as QuantityUnit)
+                }
+                fullWidth
+              >
+                <MenuItem value="kg">{t("common.unit.kg")}</MenuItem>
+                <MenuItem value="g">{t("common.unit.g")}</MenuItem>
+                <MenuItem value="l">{t("common.unit.l")}</MenuItem>
+                <MenuItem value="ml">{t("common.unit.ml")}</MenuItem>
+                <MenuItem value="nos">{t("common.unit.nos")}</MenuItem>
+              </TextField>
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <TextField
+                select
+                label={t("products.category")}
+                value={productCategoryId}
+                onChange={(e) => onChangeProductCategoryId(e.target.value)}
+                fullWidth
+                error={Boolean(productFieldErrors.productCategoryId)}
+                helperText={productFieldErrors.productCategoryId}
+              >
+                {categories.map((category) => (
+                  <MenuItem key={category.id} value={category.id}>
+                    {category.name}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Grid>
+          </Grid>
+          <Alert severity="info">{t("products.createCategoryHint")}</Alert>
+          <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
+            <Button
+              variant="outlined"
+              onClick={() => setOpenCategoryDialog(true)}
             >
-              <Box>
-                <Typography>{product.name}</Typography>
-                <Typography variant="body2">
-                  PLU: {product.pluNo} | CP: ₹ {product.costPrice} | SP: ₹{" "}
-                  {product.sellingPrice} per {product.quantityValue}{" "}
-                  {product.quantityUnit} | {product.category.name}
-                </Typography>
+              {t("products.createCategory")}
+            </Button>
+
+            <Button
+              variant="contained"
+              onClick={() => void onSaveProduct()}
+              disabled={savingProduct}
+            >
+              {editingProductId
+                ? t("products.updateProduct")
+                : t("products.addProduct")}
+            </Button>
+          </Box>
+          <Stack mt={{ xs: 2, md: 3 }} spacing={2}>
+            {products.map((product) => (
+              <Box
+                key={product.id}
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  p: 1,
+                  pl: 2,
+                  border: "1px solid #e7efe8",
+                  borderRadius: 2,
+                }}
+              >
+                <Box>
+                  <Typography>{product.name}</Typography>
+                  <Typography variant="body2">
+                    {t("products.details", {
+                      pluNo: product.pluNo,
+                      costPrice: product.costPrice,
+                      sellingPrice: product.sellingPrice,
+                      quantityValue: product.quantityValue,
+                      quantityUnit: getUnitLabel(t, product.quantityUnit),
+                      categoryName: product.category.name,
+                    })}
+                  </Typography>
+                </Box>
+                <Box>
+                  <Button size="small" onClick={() => onEditProduct(product)}>
+                    {t("products.edit")}
+                  </Button>
+                  <Button
+                    color="error"
+                    size="small"
+                    onClick={() => void onDeleteProduct(product.id)}
+                  >
+                    {t("products.delete")}
+                  </Button>
+                </Box>
               </Box>
-              <Box>
-                <Button size="small" onClick={() => onEditProduct(product)}>
-                  Edit
-                </Button>
-                <Button
-                  color="error"
-                  size="small"
-                  onClick={() => void onDeleteProduct(product.id)}
-                >
-                  Delete
-                </Button>
-              </Box>
-            </Box>
-          ))}
+            ))}
+          </Stack>
         </Stack>
       </CardContent>
       <Dialog
         open={openCategoryDialog}
         onClose={() => setOpenCategoryDialog(false)}
+        fullScreen={isMobile}
         fullWidth
         maxWidth="sm"
       >
-        <DialogTitle>Create Category</DialogTitle>
+        <DialogTitle>{t("products.createCategoryTitle")}</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
             margin="dense"
-            label="Category Name"
+            label={t("categories.categoryName")}
             fullWidth
             value={newCategoryName}
             onChange={(e) => setNewCategoryName(e.target.value)}
@@ -260,13 +312,15 @@ export default function ProductsPage({
             helperText={quickCategoryFieldError}
           />
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenCategoryDialog(false)}>Cancel</Button>
+        <DialogActions sx={{ p: 3, pt: 0 }}>
+          <Button onClick={() => setOpenCategoryDialog(false)}>
+            {t("products.cancel")}
+          </Button>
           <Button
             variant="contained"
             onClick={() => void handleCreateCategoryFromModal()}
           >
-            Create
+            {t("products.create")}
           </Button>
         </DialogActions>
       </Dialog>

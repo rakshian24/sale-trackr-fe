@@ -4,6 +4,7 @@ import { ApolloProvider } from "@apollo/client/react";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import "./index.css";
 import App from "./App";
+import "./i18n";
 import { apolloClient } from "./lib/apollo";
 import { theme } from "./theme/theme";
 
