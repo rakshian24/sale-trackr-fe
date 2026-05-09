@@ -133,6 +133,7 @@ export const PRODUCTS = gql`
       pluNo
       costPrice
       sellingPrice
+      profit
       quantityValue
       quantityUnit
       category {
@@ -160,8 +161,10 @@ export const CREATE_PRODUCT = gql`
     createProduct(input: $input) {
       id
       name
+      pluNo
       costPrice
       sellingPrice
+      quantityValue
       quantityUnit
     }
   }
@@ -178,5 +181,46 @@ export const UPDATE_PRODUCT = gql`
 export const DELETE_PRODUCT = gql`
   mutation DeleteProduct($id: ID!) {
     deleteProduct(id: $id)
+  }
+`;
+
+export const PURCHASES = gql`
+  query Purchases {
+    purchases {
+      id
+      source
+      product {
+        id
+        name
+      }
+      purchasedQuantity
+      quantityUnit
+      costPricePerUnit
+      sellingPricePerUnit
+      totalCost
+      purchasedAt
+    }
+  }
+`;
+
+export const CREATE_PURCHASE = gql`
+  mutation CreatePurchase($input: CreatePurchaseInput!) {
+    createPurchase(input: $input) {
+      id
+    }
+  }
+`;
+
+export const UPDATE_PURCHASE = gql`
+  mutation UpdatePurchase($id: ID!, $input: UpdatePurchaseInput!) {
+    updatePurchase(id: $id, input: $input) {
+      id
+    }
+  }
+`;
+
+export const DELETE_PURCHASE = gql`
+  mutation DeletePurchase($id: ID!) {
+    deletePurchase(id: $id)
   }
 `;
