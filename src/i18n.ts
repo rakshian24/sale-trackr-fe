@@ -33,6 +33,7 @@ const resources = {
         dashboard: "Dashboard",
         categories: "Categories",
         products: "Products",
+        purchases: "Purchases",
         logout: "Logout",
         menu: "Menu",
         openMenu: "Open menu",
@@ -122,6 +123,10 @@ const resources = {
         pluNo: "PLU No",
         costPrice: "Cost Price",
         sellingPrice: "Selling Price",
+        profit: "Profit",
+        listZeroStateTitle: "No products yet",
+        listZeroStateDescription:
+          "Products will appear here once they are available in your catalog.",
         quantityValue: "Quantity Value",
         unit: "Unit",
         category: "Category",
@@ -133,6 +138,9 @@ const resources = {
         createCategoryTitle: "Create Category",
         cancel: "Cancel",
         create: "Create",
+        addOneMoreProduct: "Add One More Product",
+        createCategoryDropdownPrompt:
+          'Category "{{term}}" not found. Create a new category?',
         createCategoryHint:
           'If you do not find the right category in the list, click "Create Category" to add one and continue product creation.',
         details:
@@ -151,15 +159,62 @@ const resources = {
         paymentMode: "Payment Mode",
         completeSale: "Complete Sale",
       },
+      purchases: {
+        title: "Purchases",
+        addNewPurchase: "Add New Purchase",
+        purchaseDateAndTime: "Purchase date and time",
+        source: "Source",
+        purchasedQuantity: "Purchased Quantity",
+        costPricePerUnit: "Cost price per unit",
+        sellingPricePerUnit: "Selling price per unit",
+        totalCost: "Total Cost",
+        potentialEarning: "Potential Earning",
+        profitPerUnit: "Profit per unit",
+        potentialProfitPerQuantity: "Potential profit per quantity",
+        savePurchase: "Save Purchase",
+        cancel: "Cancel",
+        updatePurchase: "Update Purchase",
+        editPurchase: "Edit purchase",
+        deletePurchase: "Delete purchase",
+        confirmDeletePurchase: "Delete this purchase?",
+        recentPurchases: "Recent Purchases",
+        selectProduct: "Product",
+        searchProductPlaceholder: "Search or select a product",
+        createSourceDropdownPrompt:
+          'Source "{{term}}" not found. Create new source?',
+        createProductDropdownPrompt:
+          'No product matches "{{term}}". Create a new product?',
+        errors: {
+          requiredPurchaseFields:
+            "Please fill purchase date/time, source and product.",
+          quantityAndPricePositive:
+            "Quantity, cost price and selling price must be greater than 0.",
+        },
+        table: {
+          dateAndTime: "Date & Time",
+          source: "Source",
+          product: "Product",
+          qty: "Qty",
+          costPerUnit: "Cost/Unit",
+          totalCost: "Total Cost",
+          sellingPerUnit: "Selling/Unit",
+          potentialEarning: "Potential Earning",
+          profitPerUnit: "Profit per unit",
+          potentialProfitPerQuantity: "Potential profit per quantity",
+          actions: "Actions",
+        },
+      },
       common: {
         cash: "Cash",
         upi: "UPI",
+        unitLabel: "Unit",
         unit: {
           kg: "kg",
           g: "g",
           l: "l",
           ml: "ml",
           nos: "nos",
+          bunch: "bunch",
         },
       },
     },
@@ -188,6 +243,7 @@ const resources = {
         dashboard: "डैशबोर्ड",
         categories: "श्रेणियां",
         products: "प्रोडक्ट्स",
+        purchases: "खरीदारी",
         logout: "लॉगआउट",
         menu: "मेन्यू",
         openMenu: "मेन्यू खोलें",
@@ -274,6 +330,10 @@ const resources = {
         pluNo: "PLU नंबर",
         costPrice: "कॉस्ट प्राइस",
         sellingPrice: "सेलिंग प्राइस",
+        profit: "लाभ",
+        listZeroStateTitle: "अभी कोई प्रोडक्ट नहीं",
+        listZeroStateDescription:
+          "कैटलॉग में प्रोडक्ट उपलब्ध होने पर वे यहां दिखेंगे।",
         quantityValue: "मात्रा",
         unit: "यूनिट",
         category: "श्रेणी",
@@ -285,6 +345,9 @@ const resources = {
         createCategoryTitle: "श्रेणी बनाएं",
         cancel: "रद्द करें",
         create: "बनाएं",
+        addOneMoreProduct: "एक और प्रोडक्ट जोड़ें",
+        createCategoryDropdownPrompt:
+          'श्रेणी "{{term}}" नहीं मिली। नई श्रेणी बनाएं?',
         createCategoryHint:
           'यदि सूची में सही श्रेणी नहीं मिलती है, तो "श्रेणी बनाएं" पर क्लिक करें और प्रोडक्ट बनाना जारी रखें।',
         details:
@@ -303,15 +366,62 @@ const resources = {
         paymentMode: "भुगतान मोड",
         completeSale: "बिक्री पूरी करें",
       },
+      purchases: {
+        title: "खरीदारी",
+        addNewPurchase: "नई खरीद जोड़ें",
+        purchaseDateAndTime: "खरीद की तारीख और समय",
+        source: "स्रोत",
+        purchasedQuantity: "खरीदी गई मात्रा",
+        costPricePerUnit: "प्रति यूनिट कॉस्ट प्राइस",
+        sellingPricePerUnit: "प्रति यूनिट सेलिंग प्राइस",
+        totalCost: "कुल लागत",
+        potentialEarning: "संभावित कमाई",
+        profitPerUnit: "प्रति यूनिट लाभ",
+        potentialProfitPerQuantity: "कुल मात्रा पर संभावित लाभ",
+        savePurchase: "खरीद सहेजें",
+        cancel: "रद्द करें",
+        updatePurchase: "खरीद अपडेट करें",
+        editPurchase: "खरीद संपादित करें",
+        deletePurchase: "खरीद हटाएं",
+        confirmDeletePurchase: "क्या आप इस खरीद को हटाना चाहते हैं?",
+        recentPurchases: "हाल की खरीदारी",
+        selectProduct: "प्रोडक्ट",
+        searchProductPlaceholder: "प्रोडक्ट खोजें या चुनें",
+        createSourceDropdownPrompt:
+          'स्रोत "{{term}}" नहीं मिला। नया स्रोत बनाएं?',
+        createProductDropdownPrompt:
+          '"{{term}}" से कोई प्रोडक्ट मेल नहीं खाता। नया प्रोडक्ट बनाएं?',
+        errors: {
+          requiredPurchaseFields:
+            "कृपया खरीद की तारीख/समय, स्रोत और प्रोडक्ट भरें।",
+          quantityAndPricePositive:
+            "मात्रा, कॉस्ट प्राइस और सेलिंग प्राइस 0 से अधिक होने चाहिए।",
+        },
+        table: {
+          dateAndTime: "तारीख और समय",
+          source: "स्रोत",
+          product: "प्रोडक्ट",
+          qty: "मात्रा",
+          costPerUnit: "लागत/यूनिट",
+          totalCost: "कुल लागत",
+          sellingPerUnit: "सेलिंग/यूनिट",
+          potentialEarning: "संभावित कमाई",
+          profitPerUnit: "प्रति यूनिट लाभ",
+          potentialProfitPerQuantity: "कुल मात्रा पर संभावित लाभ",
+          actions: "एक्शन",
+        },
+      },
       common: {
         cash: "नकद",
         upi: "यूपीआई",
+        unitLabel: "यूनिट",
         unit: {
           kg: "किलो",
           g: "ग्राम",
           l: "लीटर",
           ml: "मिलीलीटर",
           nos: "नंबर",
+          bunch: "गुच्छा",
         },
       },
     },
@@ -340,6 +450,7 @@ const resources = {
         dashboard: "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
         categories: "ವರ್ಗಗಳು",
         products: "ಉತ್ಪನ್ನಗಳು",
+        purchases: "ಖರೀದಿಗಳು",
         logout: "ಲಾಗ್‌ಔಟ್",
         menu: "ಮೆನು",
         openMenu: "ಮೆನು ತೆರೆಯಿರಿ",
@@ -360,9 +471,9 @@ const resources = {
         pluRequired: "PLU ಸಂಖ್ಯೆ ಅಗತ್ಯವಿದೆ",
         pluRange: "PLU ಸಂಖ್ಯೆ 1 ರಿಂದ 500 ನಡುವೆ ಇರಬೇಕು",
         costPriceRange:
-          "ಕಾಸ್ಟ್ ಪ್ರೈಸ್ 0 ಕ್ಕಿಂತ ಹೆಚ್ಚು ಮತ್ತು 100000 ಕ್ಕಿಂತ ಕಡಿಮೆ ಅಥವಾ ಸಮ ಇರಬೇಕು",
+          "ವೆಚ್ಚದ ಬೆಲೆ 0 ಕ್ಕಿಂತ ಹೆಚ್ಚು ಮತ್ತು 100000 ಕ್ಕಿಂತ ಕಡಿಮೆ ಅಥವಾ ಸಮ ಇರಬೇಕು",
         sellingPriceRange:
-          "ಸೆಲ್ಲಿಂಗ್ ಪ್ರೈಸ್ 0 ಕ್ಕಿಂತ ಹೆಚ್ಚು ಮತ್ತು 100000 ಕ್ಕಿಂತ ಕಡಿಮೆ ಅಥವಾ ಸಮ ಇರಬೇಕು",
+          "ಮಾರಾಟ ಬೆಲೆ 0 ಕ್ಕಿಂತ ಹೆಚ್ಚು ಮತ್ತು 100000 ಕ್ಕಿಂತ ಕಡಿಮೆ ಅಥವಾ ಸಮ ಇರಬೇಕು",
         quantityValueRange:
           "ಪ್ರಮಾಣ 0 ಕ್ಕಿಂತ ಹೆಚ್ಚು ಮತ್ತು 1000 ಕ್ಕಿಂತ ಕಡಿಮೆ ಅಥವಾ ಸಮ ಇರಬೇಕು",
         categoryRequired: "ವರ್ಗ ಅಗತ್ಯವಿದೆ",
@@ -371,12 +482,12 @@ const resources = {
         selectValidProduct:
           "ದಯವಿಟ್ಟು ಹುಡುಕಾಟದಿಂದ ಸರಿಯಾದ ಉತ್ಪನ್ನವನ್ನು ಆಯ್ಕೆಮಾಡಿ.",
         quantityAndPriceRequired:
-          "ಪ್ರಮಾಣ ಮತ್ತು ಸೆಲ್ಲಿಂಗ್ ಪ್ರೈಸ್ 0 ಕ್ಕಿಂತ ಹೆಚ್ಚು ಇರಬೇಕು.",
+          "ಪ್ರಮಾಣ ಮತ್ತು ಮಾರಾಟ ಬೆಲೆ 0 ಕ್ಕಿಂತ ಹೆಚ್ಚು ಇರಬೇಕು.",
         addOneSaleItem: "ಕನಿಷ್ಠ ಒಂದು ಮಾರಾಟ ಐಟಂ ಸೇರಿಸಿ.",
         fillRequiredCreateProduct:
           "ಉತ್ಪನ್ನ ರಚಿಸಲು ಎಲ್ಲಾ ಅಗತ್ಯ ಫೀಲ್ಡ್‌ಗಳನ್ನು ತುಂಬಿ.",
         costAndSellingPriceRequired:
-          "ಕಾಸ್ಟ್ ಪ್ರೈಸ್ ಮತ್ತು ಸೆಲ್ಲಿಂಗ್ ಪ್ರೈಸ್ 0 ಕ್ಕಿಂತ ಹೆಚ್ಚು ಇರಬೇಕು.",
+          "ವೆಚ್ಚದ ಬೆಲೆ ಮತ್ತು ಮಾರಾಟ ಬೆಲೆ 0 ಕ್ಕಿಂತ ಹೆಚ್ಚು ಇರಬೇಕು.",
       },
       dashboard: {
         totalAmount: "ಒಟ್ಟು ಮೊತ್ತ",
@@ -428,8 +539,12 @@ const resources = {
         title: "ಉತ್ಪನ್ನ",
         productName: "ಉತ್ಪನ್ನ ಹೆಸರು",
         pluNo: "PLU ಸಂಖ್ಯೆ",
-        costPrice: "ಕಾಸ್ಟ್ ಪ್ರೈಸ್",
-        sellingPrice: "ಸೆಲ್ಲಿಂಗ್ ಪ್ರೈಸ್",
+        costPrice: "ವೆಚ್ಚದ ಬೆಲೆ",
+        sellingPrice: "ಮಾರಾಟ ಬೆಲೆ",
+        profit: "ಲಾಭ",
+        listZeroStateTitle: "ಇನ್ನೂ ಯಾವುದೇ ಉತ್ಪನ್ನಗಳಿಲ್ಲ",
+        listZeroStateDescription:
+          "ನಿಮ್ಮ ಕ್ಯಾಟಲಾಗ್‌ನಲ್ಲಿ ಉತ್ಪನ್ನಗಳು ಲಭ್ಯವಾದಾಗ ಅವು ಇಲ್ಲಿ ಕಾಣಿಸುತ್ತವೆ.",
         quantityValue: "ಪ್ರಮಾಣ",
         unit: "ಯುನಿಟ್",
         category: "ವರ್ಗ",
@@ -441,6 +556,9 @@ const resources = {
         createCategoryTitle: "ವರ್ಗ ರಚಿಸಿ",
         cancel: "ರದ್ದುಮಾಡಿ",
         create: "ರಚಿಸಿ",
+        addOneMoreProduct: "ಇನ್ನೊಂದು ಉತ್ಪನ್ನ ಸೇರಿಸಿ",
+        createCategoryDropdownPrompt:
+          'ವರ್ಗ "{{term}}" ಸಿಗಲಿಲ್ಲ. ಹೊಸ ವರ್ಗ ರಚಿಸಬೇಕೇ?',
         createCategoryHint:
           'ಪಟ್ಟಿಯಲ್ಲಿ ಸರಿಯಾದ ವರ್ಗ ಸಿಗದಿದ್ದರೆ, "ವರ್ಗ ರಚಿಸಿ" ಕ್ಲಿಕ್ ಮಾಡಿ ಮತ್ತು ಉತ್ಪನ್ನ ರಚನೆಯನ್ನು ಮುಂದುವರಿಸಿ.',
         details:
@@ -459,15 +577,62 @@ const resources = {
         paymentMode: "ಪಾವತಿ ವಿಧಾನ",
         completeSale: "ಮಾರಾಟ ಪೂರ್ಣಗೊಳಿಸಿ",
       },
+      purchases: {
+        title: "ಖರೀದಿಗಳು",
+        addNewPurchase: "ಹೊಸ ಖರೀದಿ ಸೇರಿಸಿ",
+        purchaseDateAndTime: "ಖರೀದಿ ದಿನಾಂಕ ಮತ್ತು ಸಮಯ",
+        source: "ಮೂಲ",
+        purchasedQuantity: "ಖರೀದಿಸಿದ ಪ್ರಮಾಣ",
+        costPricePerUnit: "ಪ್ರತಿ ಯುನಿಟ್ ವೆಚ್ಚದ ಬೆಲೆ",
+        sellingPricePerUnit: "ಪ್ರತಿ ಯುನಿಟ್ ಮಾರಾಟ ಬೆಲೆ",
+        totalCost: "ಒಟ್ಟು ವೆಚ್ಚ",
+        potentialEarning: "ಸಂಭಾವ್ಯ ಆದಾಯ",
+        profitPerUnit: "ಪ್ರತಿ ಯುನಿಟ್ ಲಾಭ",
+        potentialProfitPerQuantity: "ಒಟ್ಟು ಪ್ರಮಾಣದ ಸಂಭವ್ಯ ಲಾಭ",
+        savePurchase: "ಖರೀದಿಯನ್ನು ಉಳಿಸಿ",
+        cancel: "ರದ್ದುಮಾಡಿ",
+        updatePurchase: "ಖರೀದಿಯನ್ನು ನವೀಕರಿಸಿ",
+        editPurchase: "ಖರೀದಿಯನ್ನು ತಿದ್ದು",
+        deletePurchase: "ಖರೀದಿಯನ್ನು ಅಳಿಸಿ",
+        confirmDeletePurchase: "ನೀವು ಈ ಖರೀದಿಯನ್ನು ಅಳಿಸಲು ಬಯಸುವಿರಾ?",
+        recentPurchases: "ಇತ್ತೀಚಿನ ಖರೀದಿಗಳು",
+        selectProduct: "ಉತ್ಪನ್ನ",
+        searchProductPlaceholder: "ಉತ್ಪನ್ನ ಹುಡುಕಿ ಅಥವಾ ಆಯ್ಕೆಮಾಡಿ",
+        createSourceDropdownPrompt:
+          '"{{term}}" ಮೂಲ ಕಂಡುಬಂದಿಲ್ಲ. ಹೊಸ ಮೂಲವನ್ನು ರಚಿಸುವುದೇ?',
+        createProductDropdownPrompt:
+          '"{{term}}" ಗೆ ಹೊಂದುವ ಉತ್ಪನ್ನವಿಲ್ಲ. ಹೊಸ ಉತ್ಪನ್ನವನ್ನು ರಚಿಸುವುದೇ?',
+        errors: {
+          requiredPurchaseFields:
+            "ದಯವಿಟ್ಟು ಖರೀದಿ ದಿನಾಂಕ/ಸಮಯ, ಮೂಲ ಮತ್ತು ಉತ್ಪನ್ನವನ್ನು ಭರ್ತಿ ಮಾಡಿ.",
+          quantityAndPricePositive:
+            "ಪ್ರಮಾಣ, ವೆಚ್ಚದ ಬೆಲೆ ಮತ್ತು ಮಾರಾಟ ಬೆಲೆ 0 ಕ್ಕಿಂತ ಹೆಚ್ಚು ಇರಬೇಕು.",
+        },
+        table: {
+          dateAndTime: "ದಿನಾಂಕ ಮತ್ತು ಸಮಯ",
+          source: "ಮೂಲ",
+          product: "ಉತ್ಪನ್ನ",
+          qty: "ಪ್ರಮಾಣ",
+          costPerUnit: "ವೆಚ್ಚ/ಯುನಿಟ್",
+          totalCost: "ಒಟ್ಟು ವೆಚ್ಚ",
+          sellingPerUnit: "ಸೆಲ್ಲಿಂಗ್/ಯುನಿಟ್",
+          potentialEarning: "ಸಂಭಾವ್ಯ ಆದಾಯ",
+          profitPerUnit: "ಪ್ರತಿ ಯುನಿಟ್ ಲಾಭ",
+          potentialProfitPerQuantity: "ಒಟ್ಟು ಪ್ರಮಾಣದ ಸಂಭವ್ಯ ಲಾಭ",
+          actions: "ಕ್ರಿಯೆಗಳು",
+        },
+      },
       common: {
         cash: "ನಗದು",
         upi: "ಯುಪಿಐ",
+        unitLabel: "ಯುನಿಟ್",
         unit: {
           kg: "ಕೆಜಿ",
           g: "ಗ್ರಾಂ",
           l: "ಲೀ",
           ml: "ಮಿಲಿ",
           nos: "ಸಂಖ್ಯೆ",
+          bunch: "ಗುಚ್ಚ",
         },
       },
     },

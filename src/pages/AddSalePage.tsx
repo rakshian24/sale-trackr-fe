@@ -22,12 +22,7 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import { useTheme } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import {
-  CATEGORIES,
-  CREATE_PRODUCT,
-  CREATE_SALES,
-  PRODUCTS,
-} from "../lib/graphql";
+import { CREATE_PRODUCT, CREATE_SALES, PRODUCTS } from "../lib/graphql";
 import { getPaymentModeLabel, getUnitLabel } from "../lib/i18nFormat";
 
 type ProductOption = {
@@ -36,16 +31,12 @@ type ProductOption = {
   pluNo?: number;
   costPrice: number;
   sellingPrice: number;
-  quantityUnit: "kg" | "g" | "l" | "ml" | "nos";
+  quantityUnit: "kg" | "g" | "l" | "ml" | "nos" | "bunch";
 };
 type SaleLine = ProductOption & { quantityValue: number; sellingPrice: number };
 type QuickProductFieldErrors = {
   productName?: string;
   pluNo?: string;
-  costPrice?: string;
-  sellingPrice?: string;
-  quantityValue?: string;
-  categoryId?: string;
 };
 
 const filterProducts = createFilterOptions<ProductOption>({
@@ -69,13 +60,6 @@ export default function AddSalePage() {
   const [openCreateProduct, setOpenCreateProduct] = useState(false);
   const [newProductName, setNewProductName] = useState("");
   const [newProductPluNo, setNewProductPluNo] = useState<number | "">("");
-  const [newProductCostPrice, setNewProductCostPrice] = useState(0);
-  const [newProductSellingPrice, setNewProductSellingPrice] = useState(0);
-  const [newProductQuantityValue, setNewProductQuantityValue] = useState(1);
-  const [newProductQuantityUnit, setNewProductQuantityUnit] = useState<
-    "kg" | "g" | "l" | "ml" | "nos"
-  >("kg");
-  const [newProductCategoryId, setNewProductCategoryId] = useState("");
   const [quickProductFieldErrors, setQuickProductFieldErrors] =
     useState<QuickProductFieldErrors>({});
 
@@ -96,16 +80,9 @@ export default function AddSalePage() {
       pluNo: number;
       costPrice: number;
       sellingPrice: number;
-      quantityValue: number;
-      quantityUnit: "kg" | "g" | "l" | "ml" | "nos";
+      quantityUnit: "kg" | "g" | "l" | "ml" | "nos" | "bunch";
     }>;
   }>(PRODUCTS, { fetchPolicy: "network-only" });
-  const { data: categoriesData } = useQuery<{
-    categories: Array<{ id: string; name: string }>;
-  }>(CATEGORIES, {
-    fetchPolicy: "network-only",
-  });
-
   const options: ProductOption[] = useMemo(
     () =>
       (productsData?.products ?? []).map((p) => ({
@@ -118,7 +95,6 @@ export default function AddSalePage() {
       })),
     [productsData?.products],
   );
-  const categories = categoriesData?.categories ?? [];
   const totalAmount = useMemo(
     () =>
       lines.reduce(
@@ -197,20 +173,6 @@ export default function AddSalePage() {
     if (newProductPluNo === "") {
       nextFieldErrors.pluNo = t("validation.fillRequiredCreateProduct");
     }
-    if (!newProductCategoryId) {
-      nextFieldErrors.categoryId = t("validation.fillRequiredCreateProduct");
-    }
-    if (newProductCostPrice <= 0) {
-      nextFieldErrors.costPrice = t("validation.costAndSellingPriceRequired");
-    }
-    if (newProductSellingPrice <= 0) {
-      nextFieldErrors.sellingPrice = t(
-        "validation.costAndSellingPriceRequired",
-      );
-    }
-    if (newProductQuantityValue <= 0) {
-      nextFieldErrors.quantityValue = t("validation.quantityAndPriceRequired");
-    }
     if (Object.keys(nextFieldErrors).length > 0) {
       setQuickProductFieldErrors(nextFieldErrors);
       return;
@@ -221,11 +183,6 @@ export default function AddSalePage() {
         input: {
           name: newProductName,
           pluNo: Number(newProductPluNo),
-          costPrice: Number(newProductCostPrice),
-          sellingPrice: Number(newProductSellingPrice),
-          quantityValue: Number(newProductQuantityValue),
-          quantityUnit: newProductQuantityUnit,
-          categoryId: newProductCategoryId,
         },
       },
     })) as { data?: { createProduct?: ProductOption } };
@@ -239,11 +196,6 @@ export default function AddSalePage() {
       setOpenCreateProduct(false);
       setNewProductName("");
       setNewProductPluNo("");
-      setNewProductCostPrice(0);
-      setNewProductSellingPrice(0);
-      setNewProductQuantityValue(1);
-      setNewProductQuantityUnit("kg");
-      setNewProductCategoryId("");
       setQuickProductFieldErrors({});
       setError("");
     }
@@ -391,89 +343,6 @@ export default function AddSalePage() {
               error={Boolean(quickProductFieldErrors.pluNo)}
               helperText={quickProductFieldErrors.pluNo}
             />
-            <TextField
-              label={t("products.costPrice")}
-              type="number"
-              value={newProductCostPrice}
-              onChange={(e) => {
-                setNewProductCostPrice(Number(e.target.value));
-                setQuickProductFieldErrors((prev) => ({
-                  ...prev,
-                  costPrice: undefined,
-                }));
-              }}
-              fullWidth
-              error={Boolean(quickProductFieldErrors.costPrice)}
-              helperText={quickProductFieldErrors.costPrice}
-            />
-            <TextField
-              label={t("products.sellingPrice")}
-              type="number"
-              value={newProductSellingPrice}
-              onChange={(e) => {
-                setNewProductSellingPrice(Number(e.target.value));
-                setQuickProductFieldErrors((prev) => ({
-                  ...prev,
-                  sellingPrice: undefined,
-                }));
-              }}
-              fullWidth
-              error={Boolean(quickProductFieldErrors.sellingPrice)}
-              helperText={quickProductFieldErrors.sellingPrice}
-            />
-            <TextField
-              label={t("products.quantityValue")}
-              type="number"
-              value={newProductQuantityValue}
-              onChange={(e) => {
-                setNewProductQuantityValue(Number(e.target.value));
-                setQuickProductFieldErrors((prev) => ({
-                  ...prev,
-                  quantityValue: undefined,
-                }));
-              }}
-              fullWidth
-              error={Boolean(quickProductFieldErrors.quantityValue)}
-              helperText={quickProductFieldErrors.quantityValue}
-            />
-            <TextField
-              select
-              label={t("products.unit")}
-              value={newProductQuantityUnit}
-              onChange={(e) =>
-                setNewProductQuantityUnit(
-                  e.target.value as "kg" | "g" | "l" | "ml" | "nos",
-                )
-              }
-              fullWidth
-            >
-              <MenuItem value="kg">{t("common.unit.kg")}</MenuItem>
-              <MenuItem value="g">{t("common.unit.g")}</MenuItem>
-              <MenuItem value="l">{t("common.unit.l")}</MenuItem>
-              <MenuItem value="ml">{t("common.unit.ml")}</MenuItem>
-              <MenuItem value="nos">{t("common.unit.nos")}</MenuItem>
-            </TextField>
-            <TextField
-              select
-              label={t("products.category")}
-              value={newProductCategoryId}
-              onChange={(e) => {
-                setNewProductCategoryId(e.target.value);
-                setQuickProductFieldErrors((prev) => ({
-                  ...prev,
-                  categoryId: undefined,
-                }));
-              }}
-              fullWidth
-              error={Boolean(quickProductFieldErrors.categoryId)}
-              helperText={quickProductFieldErrors.categoryId}
-            >
-              {categories.map((c) => (
-                <MenuItem key={c.id} value={c.id}>
-                  {c.name}
-                </MenuItem>
-              ))}
-            </TextField>
           </Stack>
         </DialogContent>
         <DialogActions sx={{ p: 3, pt: 0 }}>

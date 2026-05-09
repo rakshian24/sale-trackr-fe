@@ -29,22 +29,19 @@ import { useTranslation } from "react-i18next";
 import {
   CATEGORIES,
   CREATE_CATEGORY,
-  CREATE_PRODUCT,
   DASHBOARD_STATS,
   DELETE_CATEGORY,
-  DELETE_PRODUCT,
   LOGIN,
-  PRODUCTS,
   REGISTER,
   SALES,
   UPDATE_CATEGORY,
-  UPDATE_PRODUCT,
 } from "./lib/graphql";
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from "./i18n";
 import DashboardPage from "./pages/DashboardPage";
 import CategoriesPage from "./pages/CategoriesPage";
 import ProductsPage from "./pages/ProductsPage";
 import AddSalePage from "./pages/AddSalePage";
+import PurchasesPage from "./pages/PurchasesPage";
 
 function App() {
   const { t, i18n } = useTranslation();
@@ -60,16 +57,6 @@ function App() {
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(
     null,
   );
-  const [productName, setProductName] = useState("");
-  const [productPluNo, setProductPluNo] = useState<number | "">("");
-  const [productCostPrice, setProductCostPrice] = useState(0);
-  const [productSellingPrice, setProductSellingPrice] = useState(0);
-  const [productQuantityValue, setProductQuantityValue] = useState(1);
-  const [productQuantityUnit, setProductQuantityUnit] = useState<
-    "kg" | "g" | "l" | "ml" | "nos"
-  >("kg");
-  const [productCategoryId, setProductCategoryId] = useState("");
-  const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [datePreset, setDatePreset] = useState<
@@ -81,15 +68,6 @@ function App() {
     | "LAST_MONTH"
   >("TODAY");
   const [categoryFieldError, setCategoryFieldError] = useState("");
-  const [quickCategoryFieldError, setQuickCategoryFieldError] = useState("");
-  const [productFieldErrors, setProductFieldErrors] = useState<{
-    productName?: string;
-    productPluNo?: string;
-    productCostPrice?: string;
-    productSellingPrice?: string;
-    productQuantityValue?: string;
-    productCategoryId?: string;
-  }>({});
 
   const [register, { loading: registering }] = useMutation(REGISTER);
   const [login, { loading: loggingIn }] = useMutation(LOGIN);
@@ -101,17 +79,7 @@ function App() {
     refetchQueries: [CATEGORIES],
   });
   const [deleteCategory] = useMutation(DELETE_CATEGORY, {
-    refetchQueries: [CATEGORIES, PRODUCTS],
-  });
-  const [createProduct, { loading: savingProduct }] = useMutation(
-    CREATE_PRODUCT,
-    { refetchQueries: [PRODUCTS] },
-  );
-  const [updateProduct] = useMutation(UPDATE_PRODUCT, {
-    refetchQueries: [PRODUCTS],
-  });
-  const [deleteProduct] = useMutation(DELETE_PRODUCT, {
-    refetchQueries: [PRODUCTS],
+    refetchQueries: [CATEGORIES],
   });
   const { data: statsData } = useQuery<{
     dashboardStats: {
@@ -160,22 +128,9 @@ function App() {
   const { data: categoriesData } = useQuery<{
     categories: Array<{ id: string; name: string }>;
   }>(CATEGORIES, { skip: !token, fetchPolicy: "network-only" });
-  const { data: productsData } = useQuery<{
-    products: Array<{
-      id: string;
-      name: string;
-      pluNo: number;
-      costPrice: number;
-      sellingPrice: number;
-      quantityValue: number;
-      quantityUnit: "kg" | "g" | "l" | "ml" | "nos";
-      category: { id: string; name: string };
-    }>;
-  }>(PRODUCTS, { skip: !token, fetchPolicy: "network-only" });
   const stats = useMemo(() => statsData?.dashboardStats, [statsData]);
   const sales = salesData?.sales ?? [];
   const categories = categoriesData?.categories ?? [];
-  const products = productsData?.products ?? [];
   const language = (i18n.resolvedLanguage ?? "en") as SupportedLanguage;
 
   const getErrorMessage = (err: unknown, fallback: string): string => {
@@ -183,50 +138,6 @@ function App() {
     if (message && message.includes("already exists")) return message;
     if (message && message.length > 0) return message;
     return fallback;
-  };
-
-  const validateProductForm = () => {
-    const nextErrors: {
-      productName?: string;
-      productPluNo?: string;
-      productCostPrice?: string;
-      productSellingPrice?: string;
-      productQuantityValue?: string;
-      productCategoryId?: string;
-    } = {};
-
-    if (!productName.trim())
-      nextErrors.productName = t("validation.productNameRequired");
-    else if (productName.trim().length > 100)
-      nextErrors.productName = t("validation.productNameMax");
-
-    if (productPluNo === "" || Number.isNaN(productPluNo))
-      nextErrors.productPluNo = t("validation.pluRequired");
-    else if (productPluNo <= 0 || productPluNo > 500)
-      nextErrors.productPluNo = t("validation.pluRange");
-
-    if (
-      !Number.isFinite(productCostPrice) ||
-      productCostPrice <= 0 ||
-      productCostPrice > 100000
-    ) {
-      nextErrors.productCostPrice = t("validation.costPriceRange");
-    }
-    if (
-      !Number.isFinite(productSellingPrice) ||
-      productSellingPrice <= 0 ||
-      productSellingPrice > 100000
-    ) {
-      nextErrors.productSellingPrice = t("validation.sellingPriceRange");
-    }
-    if (productQuantityValue <= 0 || productQuantityValue > 1000) {
-      nextErrors.productQuantityValue = t("validation.quantityValueRange");
-    }
-    if (!productCategoryId)
-      nextErrors.productCategoryId = t("validation.categoryRequired");
-
-    setProductFieldErrors(nextErrors);
-    return Object.keys(nextErrors).length === 0;
   };
 
   const validateCategoryName = (value: string): string => {
@@ -300,93 +211,6 @@ function App() {
   const handleDeleteCategory = async (id: string) => {
     await deleteCategory({ variables: { id } });
     setMessage(t("messages.categoryDeleted"));
-  };
-
-  const handleQuickCreateCategory = async (
-    nameValue: string,
-  ): Promise<string | null> => {
-    const validationError = validateCategoryName(nameValue);
-    if (validationError) {
-      setQuickCategoryFieldError(validationError);
-      return null;
-    }
-    try {
-      const response = (await createCategory({
-        variables: { input: { name: nameValue } },
-      })) as {
-        data?: { createCategory?: { id: string } };
-      };
-      const createdId = response.data?.createCategory?.id ?? null;
-      if (createdId) {
-        setMessage(t("messages.categoryCreated"));
-        setError("");
-        setQuickCategoryFieldError("");
-      }
-      return createdId;
-    } catch (err) {
-      setError(getErrorMessage(err, t("messages.unableSaveCategory")));
-      return null;
-    }
-  };
-
-  const handleSaveProduct = async () => {
-    if (!validateProductForm()) return;
-    const input = {
-      name: productName,
-      pluNo: Number(productPluNo),
-      costPrice: Number(productCostPrice),
-      sellingPrice: Number(productSellingPrice),
-      quantityValue: Number(productQuantityValue),
-      quantityUnit: productQuantityUnit,
-      categoryId: productCategoryId,
-    };
-    try {
-      if (editingProductId) {
-        await updateProduct({ variables: { id: editingProductId, input } });
-        setMessage(t("messages.productUpdated"));
-      } else {
-        await createProduct({ variables: { input } });
-        setMessage(t("messages.productCreated"));
-      }
-      setError("");
-      setProductFieldErrors({});
-      setProductName("");
-      setProductPluNo("");
-      setProductCostPrice(0);
-      setProductSellingPrice(0);
-      setProductQuantityValue(1);
-      setProductQuantityUnit("kg");
-      setProductCategoryId("");
-      setEditingProductId(null);
-    } catch (err) {
-      setError(getErrorMessage(err, t("messages.unableSaveProduct")));
-    }
-  };
-
-  const handleEditProduct = (product: {
-    id: string;
-    name: string;
-    pluNo: number;
-    costPrice: number;
-    sellingPrice: number;
-    quantityValue: number;
-    quantityUnit: "kg" | "g" | "l" | "ml" | "nos";
-    category: { id: string };
-  }) => {
-    setEditingProductId(product.id);
-    setProductName(product.name);
-    setProductPluNo(product.pluNo);
-    setProductCostPrice(product.costPrice);
-    setProductSellingPrice(product.sellingPrice);
-    setProductQuantityValue(product.quantityValue);
-    setProductQuantityUnit(product.quantityUnit);
-    setProductCategoryId(product.category.id);
-    setProductFieldErrors({});
-  };
-
-  const handleDeleteProduct = async (id: string) => {
-    await deleteProduct({ variables: { id } });
-    setMessage(t("messages.productDeleted"));
   };
 
   const handleLogout = async () => {
@@ -661,6 +485,16 @@ function App() {
                             }}
                           />
                         </ListItemButton>
+                        <ListItemButton component={Link} to="/purchases">
+                          <ListItemText
+                            primary={t("nav.purchases")}
+                            slotProps={{
+                              primary: {
+                                fontSize: "16px",
+                              },
+                            }}
+                          />
+                        </ListItemButton>
                       </List>
                       <Divider />
                       <List dense>
@@ -694,6 +528,9 @@ function App() {
                     </Button>
                     <Button component={Link} to="/products" color="inherit">
                       {t("nav.products")}
+                    </Button>
+                    <Button component={Link} to="/purchases" color="inherit">
+                      {t("nav.purchases")}
                     </Button>
                   </Box>
                   <Box sx={{ flexGrow: 1 }} />
@@ -769,37 +606,8 @@ function App() {
                 />
               }
             />
-            <Route
-              path="/products"
-              element={
-                <ProductsPage
-                  categories={categories}
-                  products={products}
-                  productName={productName}
-                  productPluNo={productPluNo}
-                  productCostPrice={productCostPrice}
-                  productSellingPrice={productSellingPrice}
-                  productQuantityValue={productQuantityValue}
-                  productQuantityUnit={productQuantityUnit}
-                  productCategoryId={productCategoryId}
-                  editingProductId={editingProductId}
-                  savingProduct={savingProduct}
-                  onChangeProductName={setProductName}
-                  onChangeProductPluNo={setProductPluNo}
-                  onChangeProductCostPrice={setProductCostPrice}
-                  onChangeProductSellingPrice={setProductSellingPrice}
-                  onChangeProductQuantityValue={setProductQuantityValue}
-                  onChangeProductQuantityUnit={setProductQuantityUnit}
-                  onChangeProductCategoryId={setProductCategoryId}
-                  onQuickCreateCategory={handleQuickCreateCategory}
-                  onSaveProduct={handleSaveProduct}
-                  onEditProduct={handleEditProduct}
-                  onDeleteProduct={handleDeleteProduct}
-                  productFieldErrors={productFieldErrors}
-                  quickCategoryFieldError={quickCategoryFieldError}
-                />
-              }
-            />
+            <Route path="/products" element={<ProductsPage />} />
+            <Route path="/purchases" element={<PurchasesPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Container>
