@@ -194,6 +194,7 @@ export const PURCHASES = gql`
         name
       }
       purchasedQuantity
+      quantityRemaining
       quantityUnit
       costPricePerUnit
       sellingPricePerUnit

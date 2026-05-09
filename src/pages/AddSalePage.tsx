@@ -31,6 +31,8 @@ type ProductOption = {
   pluNo?: number;
   costPrice: number;
   sellingPrice: number;
+  /** Stock on hand (backend `Product.quantityValue`). */
+  stockOnHand: number;
   quantityUnit: "kg" | "g" | "l" | "ml" | "nos" | "bunch";
 };
 type SaleLine = ProductOption & { quantityValue: number; sellingPrice: number };
@@ -42,6 +44,13 @@ type QuickProductFieldErrors = {
 const filterProducts = createFilterOptions<ProductOption>({
   stringify: (option) => `${option.name} ${option.pluNo ?? ""}`,
 });
+
+function getFirstGraphQLErrorMessage(err: unknown): string | undefined {
+  if (err === null || typeof err !== "object") return undefined;
+  const rec = err as { graphQLErrors?: readonly { message?: string }[] };
+  const first = rec.graphQLErrors?.[0]?.message;
+  return typeof first === "string" ? first : undefined;
+}
 
 export default function AddSalePage() {
   const { t } = useTranslation();
@@ -64,7 +73,7 @@ export default function AddSalePage() {
     useState<QuickProductFieldErrors>({});
 
   const [createSales, { loading }] = useMutation(CREATE_SALES, {
-    refetchQueries: ["Sales", "DashboardStats"],
+    refetchQueries: ["Sales", "DashboardStats", { query: PRODUCTS }],
     awaitRefetchQueries: true,
   });
   const [createProduct, { loading: creatingProduct }] = useMutation(
@@ -80,6 +89,7 @@ export default function AddSalePage() {
       pluNo: number;
       costPrice: number;
       sellingPrice: number;
+      quantityValue: number;
       quantityUnit: "kg" | "g" | "l" | "ml" | "nos" | "bunch";
     }>;
   }>(PRODUCTS, { fetchPolicy: "network-only" });
@@ -91,6 +101,7 @@ export default function AddSalePage() {
         pluNo: p.pluNo,
         costPrice: p.costPrice,
         sellingPrice: p.sellingPrice,
+        stockOnHand: p.quantityValue,
         quantityUnit: p.quantityUnit,
       })),
     [productsData?.products],
@@ -116,7 +127,9 @@ export default function AddSalePage() {
     setSearchText(product?.name ?? "");
     if (product) {
       setSellingPrice(product.sellingPrice);
-      setQuantityValue(1);
+      setQuantityValue(
+        product.stockOnHand > 0 ? Math.min(1, product.stockOnHand) : "",
+      );
     }
   };
 
@@ -132,6 +145,14 @@ export default function AddSalePage() {
       sellingPrice <= 0
     ) {
       setError(t("validation.quantityAndPriceRequired"));
+      return;
+    }
+    const alreadyQueued = lines
+      .filter((l) => l.id === selectedProduct.id)
+      .reduce((sum, l) => sum + l.quantityValue, 0);
+    const availableNow = selectedProduct.stockOnHand - alreadyQueued;
+    if (quantityValue > availableNow + 1e-6) {
+      setError(t("validation.quantityExceedsStock"));
       return;
     }
     setLines((prev) => [
@@ -150,19 +171,44 @@ export default function AddSalePage() {
       setError(t("validation.addOneSaleItem"));
       return;
     }
-    await createSales({
-      variables: {
-        input: {
-          paymentMode,
-          items: lines.map((line) => ({
-            productId: line.id,
-            quantityValue: line.quantityValue,
-            sellingPrice: line.sellingPrice,
-          })),
+    const stockById = new Map(options.map((p) => [p.id, p.stockOnHand] as const));
+    const needByProduct = new Map<string, number>();
+    for (const line of lines) {
+      needByProduct.set(
+        line.id,
+        (needByProduct.get(line.id) ?? 0) + line.quantityValue,
+      );
+    }
+    for (const [productId, needed] of needByProduct.entries()) {
+      const available = stockById.get(productId);
+      if (
+        available !== undefined &&
+        needed > available + 1e-6
+      ) {
+        const name = lines.find((l) => l.id === productId)?.name ?? productId;
+        setError(t("validation.insufficientStockForProduct", { name }));
+        return;
+      }
+    }
+    setError("");
+    try {
+      await createSales({
+        variables: {
+          input: {
+            paymentMode,
+            items: lines.map((line) => ({
+              productId: line.id,
+              quantityValue: line.quantityValue,
+              sellingPrice: line.sellingPrice,
+            })),
+          },
         },
-      },
-    });
-    navigate("/");
+      });
+      navigate("/");
+    } catch (err: unknown) {
+      const gqlMsg = getFirstGraphQLErrorMessage(err);
+      setError(gqlMsg ?? t("validation.unableToCompleteSale"));
+    }
   };
 
   const handleQuickCreateProduct = async () => {
@@ -185,14 +231,37 @@ export default function AddSalePage() {
           pluNo: Number(newProductPluNo),
         },
       },
-    })) as { data?: { createProduct?: ProductOption } };
+    })) as {
+      data?: {
+        createProduct?: {
+          id: string;
+          name: string;
+          pluNo?: number;
+          costPrice: number;
+          sellingPrice: number;
+          quantityValue: number;
+          quantityUnit: ProductOption["quantityUnit"];
+        };
+      };
+    };
 
     const created = response.data?.createProduct;
     if (created) {
-      setSelectedProduct(created);
-      setSearchText(created.name);
-      setSellingPrice(created.sellingPrice);
-      setQuantityValue(1);
+      const asOption: ProductOption = {
+        id: created.id,
+        name: created.name,
+        pluNo: created.pluNo,
+        costPrice: created.costPrice,
+        sellingPrice: created.sellingPrice,
+        quantityUnit: created.quantityUnit,
+        stockOnHand: created.quantityValue,
+      };
+      setSelectedProduct(asOption);
+      setSearchText(asOption.name);
+      setSellingPrice(asOption.sellingPrice);
+      setQuantityValue(
+        asOption.stockOnHand > 0 ? Math.min(1, asOption.stockOnHand) : "",
+      );
       setOpenCreateProduct(false);
       setNewProductName("");
       setNewProductPluNo("");
@@ -272,9 +341,22 @@ export default function AddSalePage() {
                 slotProps={{ htmlInput: { min: 0 } }}
               />
             </Grid>
+            {selectedProduct ? (
+              <Grid size={{ xs: 12 }}>
+                <Typography variant="body2" color="text.secondary">
+                  {t("sales.stockOnHand", {
+                    amount: selectedProduct.stockOnHand,
+                    unit: getUnitLabel(t, selectedProduct.quantityUnit),
+                  })}{" "}
+                  <Box component="span" sx={{ opacity: 0.85 }}>
+                    ({t("sales.fifoHint")})
+                  </Box>
+                </Typography>
+              </Grid>
+            ) : null}
             <Grid size={{ xs: 12, md: 3 }}>
               <TextField
-                label={`${t("products.quantityValue")} (${getUnitLabel(t, selectedProduct?.quantityUnit)})`}
+                label={`${t("sales.qtyToSell")} (${getUnitLabel(t, selectedProduct?.quantityUnit)})`}
                 type="number"
                 fullWidth
                 value={quantityValue}
