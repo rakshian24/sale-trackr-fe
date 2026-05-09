@@ -112,6 +112,13 @@ function formatPurchaseDateTime(
   };
 }
 
+function getFirstGraphQLErrorMessage(err: unknown): string | undefined {
+  if (err === null || typeof err !== "object") return undefined;
+  const rec = err as { graphQLErrors?: readonly { message?: string }[] };
+  const first = rec.graphQLErrors?.[0]?.message;
+  return typeof first === "string" ? first : undefined;
+}
+
 function toLocalDatetimeInputValue(value: string): string {
   const trimmed = value.trim();
   const asNumber = Number(trimmed);
@@ -180,6 +187,7 @@ export default function PurchasesPage() {
       source: string;
       product: { id: string; name: string };
       purchasedQuantity: number;
+      quantityRemaining: number;
       quantityUnit: PurchaseUnit;
       costPricePerUnit: number;
       sellingPricePerUnit: number;
@@ -477,11 +485,22 @@ export default function PurchasesPage() {
 
   const handleDeletePurchaseConfirm = async () => {
     if (!purchasePendingDeleteId) return;
-    await deletePurchase({ variables: { id: purchasePendingDeleteId } });
-    if (editingPurchaseId === purchasePendingDeleteId) {
-      setEditingPurchaseId(null);
+    try {
+      await deletePurchase({ variables: { id: purchasePendingDeleteId } });
+      setError("");
+      if (editingPurchaseId === purchasePendingDeleteId) {
+        setEditingPurchaseId(null);
+      }
+      setPurchasePendingDeleteId(null);
+    } catch (err: unknown) {
+      const gqlMsg = getFirstGraphQLErrorMessage(err);
+      const msg =
+        gqlMsg ||
+        (err instanceof Error ? err.message : "") ||
+        t("purchases.errors.unableDeletePurchase");
+      setError(msg);
+      setPurchasePendingDeleteId(null);
     }
-    setPurchasePendingDeleteId(null);
   };
 
   return (
@@ -982,6 +1001,9 @@ export default function PurchasesPage() {
                   <TableCell sx={{ minWidth: 110 }}>
                     {t("purchases.table.qty")}
                   </TableCell>
+                  <TableCell sx={{ minWidth: 100 }}>
+                    {t("purchases.table.remaining")}
+                  </TableCell>
                   <TableCell>{t("purchases.table.costPerUnit")}</TableCell>
                   <TableCell>{t("purchases.table.totalCost")}</TableCell>
                   <TableCell>{t("purchases.table.sellingPerUnit")}</TableCell>
@@ -1026,6 +1048,12 @@ export default function PurchasesPage() {
                       <TableCell>{purchase.product.name}</TableCell>
                       <TableCell sx={{ minWidth: 110 }}>
                         {purchase.purchasedQuantity}{" "}
+                        {getUnitLabel(t, purchase.quantityUnit)}
+                      </TableCell>
+                      <TableCell sx={{ minWidth: 100 }}>
+                        {purchase.quantityRemaining.toFixed(
+                          purchase.quantityRemaining % 1 === 0 ? 0 : 3,
+                        )}{" "}
                         {getUnitLabel(t, purchase.quantityUnit)}
                       </TableCell>
                       <TableCell>

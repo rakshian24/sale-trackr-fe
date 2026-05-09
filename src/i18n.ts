@@ -66,6 +66,12 @@ const resources = {
         quantityAndPriceRequired:
           "Quantity and selling price must be greater than 0.",
         addOneSaleItem: "Add at least one sale item.",
+        quantityExceedsStock:
+          "This quantity is more than the stock available for this product in the current bill.",
+        insufficientStockForProduct:
+          "Insufficient stock for {{name}}. Reduce quantities or add a purchase.",
+        unableToCompleteSale:
+          "Could not complete the sale. Check stock and try again.",
         fillRequiredCreateProduct:
           "Please fill all required fields to create product.",
         costAndSellingPriceRequired:
@@ -158,6 +164,9 @@ const resources = {
         total: "Total: ₹ {{amount}}",
         paymentMode: "Payment Mode",
         completeSale: "Complete Sale",
+        stockOnHand: "Stock on hand: {{amount}} {{unit}}",
+        fifoHint: "oldest batches sell first (FIFO)",
+        qtyToSell: "Quantity to sell",
       },
       purchases: {
         title: "Purchases",
@@ -189,12 +198,15 @@ const resources = {
             "Please fill purchase date/time, source and product.",
           quantityAndPricePositive:
             "Quantity, cost price and selling price must be greater than 0.",
+          unableDeletePurchase:
+            "This purchase cannot be deleted because it is linked to sales.",
         },
         table: {
           dateAndTime: "Date & Time",
           source: "Source",
           product: "Product",
           qty: "Qty",
+          remaining: "Remaining",
           costPerUnit: "Cost/Unit",
           totalCost: "Total Cost",
           sellingPerUnit: "Selling/Unit",
@@ -273,6 +285,12 @@ const resources = {
         quantityAndPriceRequired:
           "मात्रा और सेलिंग प्राइस 0 से अधिक होने चाहिए।",
         addOneSaleItem: "कम से कम एक बिक्री आइटम जोड़ें।",
+        quantityExceedsStock:
+          "यह मात्रा इस बिल में इस प्रोडक्ट के उपलब्ध स्टॉक से अधिक है।",
+        insufficientStockForProduct:
+          "{{name}} के लिए स्टॉक कम है। मात्रा कम करें या खरीद दर्ज करें।",
+        unableToCompleteSale:
+          "बिक्री पूरी नहीं हो सकी। स्टॉक जांचकर पुनः प्रयास करें।",
         fillRequiredCreateProduct:
           "प्रोडक्ट बनाने के लिए सभी आवश्यक फ़ील्ड भरें।",
         costAndSellingPriceRequired:
@@ -365,6 +383,9 @@ const resources = {
         total: "कुल: ₹ {{amount}}",
         paymentMode: "भुगतान मोड",
         completeSale: "बिक्री पूरी करें",
+        stockOnHand: "हाथ में स्टॉक: {{amount}} {{unit}}",
+        fifoHint: "सबसे पुरानी खरीद पहले बिकती है (FIFO)",
+        qtyToSell: "बेचने की मात्रा",
       },
       purchases: {
         title: "खरीदारी",
@@ -396,12 +417,15 @@ const resources = {
             "कृपया खरीद की तारीख/समय, स्रोत और प्रोडक्ट भरें।",
           quantityAndPricePositive:
             "मात्रा, कॉस्ट प्राइस और सेलिंग प्राइस 0 से अधिक होने चाहिए।",
+          unableDeletePurchase:
+            "यह खरीद बिक्री से जुड़ी है, इसे हटाया नहीं जा सकता।",
         },
         table: {
           dateAndTime: "तारीख और समय",
           source: "स्रोत",
           product: "प्रोडक्ट",
           qty: "मात्रा",
+          remaining: "शेष",
           costPerUnit: "लागत/यूनिट",
           totalCost: "कुल लागत",
           sellingPerUnit: "सेलिंग/यूनिट",
@@ -484,6 +508,12 @@ const resources = {
         quantityAndPriceRequired:
           "ಪ್ರಮಾಣ ಮತ್ತು ಮಾರಾಟ ಬೆಲೆ 0 ಕ್ಕಿಂತ ಹೆಚ್ಚು ಇರಬೇಕು.",
         addOneSaleItem: "ಕನಿಷ್ಠ ಒಂದು ಮಾರಾಟ ಐಟಂ ಸೇರಿಸಿ.",
+        quantityExceedsStock:
+          "ಈ ಪ್ರಮಾಣವು ಈ ಬಿಲ್‌ನಲ್ಲಿ ಲಭ್ಯವಿರುವ ಸ್ಟಾಕ್‌ಗಿಂತ ಹೆಚ್ಚಾಗಿದೆ.",
+        insufficientStockForProduct:
+          "{{name}} ಗೆ ಸ್ಟಾಕ್ ಸಾಕಾಗಿಲ್ಲ. ಪ್ರಮಾಣ ಕಡಿಮೆ ಮಾಡಿ ಅಥವಾ ಖರೀದಿ ಸೇರಿಸಿ.",
+        unableToCompleteSale:
+          "ಮಾರಾಟ ಪೂರ್ಣಗೊಂಡಿಲ್ಲ. ಸ್ಟಾಕ್ ಪರಿಶೀಲಿಸಿ ಮತ್ತು ಮತ್ತೊಮ್ಮೆ ಪ್ರಯತ್ನಿಸಿ.",
         fillRequiredCreateProduct:
           "ಉತ್ಪನ್ನ ರಚಿಸಲು ಎಲ್ಲಾ ಅಗತ್ಯ ಫೀಲ್ಡ್‌ಗಳನ್ನು ತುಂಬಿ.",
         costAndSellingPriceRequired:
@@ -576,6 +606,9 @@ const resources = {
         total: "ಒಟ್ಟು: ₹ {{amount}}",
         paymentMode: "ಪಾವತಿ ವಿಧಾನ",
         completeSale: "ಮಾರಾಟ ಪೂರ್ಣಗೊಳಿಸಿ",
+        stockOnHand: "ಲಭ್ಯ ಸ್ಟಾಕ್: {{amount}} {{unit}}",
+        fifoHint: "ಹಳೆಯ ಖರೀದಿ మೊದಲು ಮಾರಾಟವಾಗುತ್ತದೆ (FIFO)",
+        qtyToSell: "ಮಾರಾಟದ ಪ್ರಮಾಣ",
       },
       purchases: {
         title: "ಖರೀದಿಗಳು",
@@ -607,12 +640,15 @@ const resources = {
             "ದಯವಿಟ್ಟು ಖರೀದಿ ದಿನಾಂಕ/ಸಮಯ, ಮೂಲ ಮತ್ತು ಉತ್ಪನ್ನವನ್ನು ಭರ್ತಿ ಮಾಡಿ.",
           quantityAndPricePositive:
             "ಪ್ರಮಾಣ, ವೆಚ್ಚದ ಬೆಲೆ ಮತ್ತು ಮಾರಾಟ ಬೆಲೆ 0 ಕ್ಕಿಂತ ಹೆಚ್ಚು ಇರಬೇಕು.",
+          unableDeletePurchase:
+            "ಈ ಖರೀದಿಯು ಮಾರಾಟಗಳಿಗೆ ಲಿಂಕ್ ಆಗಿದೆ; ಅಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ.",
         },
         table: {
           dateAndTime: "ದಿನಾಂಕ ಮತ್ತು ಸಮಯ",
           source: "ಮೂಲ",
           product: "ಉತ್ಪನ್ನ",
           qty: "ಪ್ರಮಾಣ",
+          remaining: "ಉಳಿದಿದೆ",
           costPerUnit: "ವೆಚ್ಚ/ಯುನಿಟ್",
           totalCost: "ಒಟ್ಟು ವೆಚ್ಚ",
           sellingPerUnit: "ಸೆಲ್ಲಿಂಗ್/ಯುನಿಟ್",
